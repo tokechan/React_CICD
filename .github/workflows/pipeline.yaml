@@ -84,10 +84,21 @@ jobs:
 
       - name: Prepare Google Application Credentials
         run: |
+          echo "Creating credentials file..."
           echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }} | base64 --decode > /tmp/private-key.json
           echo "Credentials file created:"
           ls -la /tmp/private-key.json
           echo "File size: $(wc -c < /tmp/private-key.json) bytes"
+          echo "First few characters:"
+          head -c 50 /tmp/private-key.json
+
+      - name: Test Firebase Authentication
+        env:
+          GOOGLE_APPLICATION_CREDENTIALS: /tmp/private-key.json
+        run: |
+          echo "Testing Firebase authentication..."
+          firebase projects:list
+        working-directory: todo-cicd
 
       - name: Deploy to Firebase
         env:
