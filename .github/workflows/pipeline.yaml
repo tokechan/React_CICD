@@ -85,12 +85,12 @@ jobs:
       - name: Prepare Google Application Credentials
         run: |
           echo "Creating credentials file..."
-          if [ -z "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}" ]; then
-            echo "ERROR: GOOGLE_APPLICATION_CREDENTIALS_JSON secret is empty or not set!"
+          if [ -z "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }}" ]; then
+            echo "ERROR: GOOGLE_APPLICATION_CREDENTIALS secret is empty or not set!"
             exit 1
           fi
-          echo "Secret length: ${#GOOGLE_APPLICATION_CREDENTIALS_JSON}"
-          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }} | base64 --decode > /tmp/private-key.json
+          echo "Secret length: ${#GOOGLE_APPLICATION_CREDENTIALS}"
+          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} | base64 --decode > /tmp/private-key.json
           echo "Credentials file created:"
           ls -la /tmp/private-key.json
           echo "File size: $(wc -c < /tmp/private-key.json) bytes"
