@@ -58,3 +58,39 @@ jobs:
       - name: Run tests
         run: npm run test
         working-directory: todo-cicd
+
+  deploy:
+    name: Deploy Phase
+    runs-on: ubuntu-latest
+    needs: [build, test]
+
+    steps: 
+      - name: Checkout code
+        uses: actions/checkout@4
+
+      - name: Download build artifacts
+        uses: actions/download-artifact@4
+        with:
+          name: build-files
+          path: dist/
+
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Install dependencise
+        run: npm install
+
+      - name: Prepear Google Application Credentials
+        run: |
+          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }} | base64 --decode > $HOME/private-key.json
+
+      - name: Deploy to Firebase
+        run:
+          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/private-key.json
+          firebase experiments:enable webframeworks
+          firebase deploy --only hosting
+      - name: Remove private key
+        if: always()
+        run: rm $HOME/private-key.json
+        
