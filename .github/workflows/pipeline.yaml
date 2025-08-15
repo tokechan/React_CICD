@@ -69,7 +69,7 @@ jobs:
         uses: actions/checkout@4
 
       - name: Download build artifacts
-        uses: actions/download-artifact@4
+        uses: actions/download-artifact@v4
         with:
           name: build-files
           path: dist/
@@ -93,4 +93,3 @@ jobs:
       - name: Remove private key
         if: always()
         run: rm $HOME/private-key.json
-        
