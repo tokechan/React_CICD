@@ -85,12 +85,22 @@ jobs:
       - name: Prepare Google Application Credentials
         run: |
           echo "Creating credentials file..."
+          if [ -z "${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }}" ]; then
+            echo "ERROR: GOOGLE_APPLICATION_CREDENTIALS_JSON secret is empty or not set!"
+            exit 1
+          fi
+          echo "Secret length: ${#GOOGLE_APPLICATION_CREDENTIALS_JSON}"
           echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS_JSON }} | base64 --decode > /tmp/private-key.json
           echo "Credentials file created:"
           ls -la /tmp/private-key.json
           echo "File size: $(wc -c < /tmp/private-key.json) bytes"
-          echo "First few characters:"
-          head -c 50 /tmp/private-key.json
+          if [ -s /tmp/private-key.json ]; then
+            echo "First few characters:"
+            head -c 50 /tmp/private-key.json
+          else
+            echo "ERROR: Credentials file is empty!"
+            exit 1
+          fi
 
       - name: Test Firebase Authentication
         env:
