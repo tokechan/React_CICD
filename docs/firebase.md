@@ -146,17 +146,86 @@ wc -c < encoded_firebase_key.txt
   run: rm $HOME/private-key.json
 ```
 
-## 現在の状況
+### 5. Firebase deployコマンドの作業ディレクトリ問題
 
-- **Build Phase**: ✅ 成功
-- **Test Phase**: ✅ 成功  
-- **Deploy Phase**: ❌ Firebase認証エラーが継続
+**問題**: 
+```
+Error: Not in a Firebase app directory (could not locate firebase.json)
+```
 
-## 次のステップ
+**原因**: `firebase deploy`コマンドの実行時に`working-directory`が指定されていない
 
-1. GitHub Secretsの再設定確認
-2. サービスアカウントキーの権限確認
-3. 代替案としてFirebase CLI Tokenの検討
+**解決方法**:
+```yaml
+- name: Deploy Firebase
+  run: |
+    firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+  working-directory: todo-cicd  # この行を追加
+```
+
+### 6. GitHub Secretsの命名エラー
+
+**問題**: シークレット名のタイポ
+- ワークフロー: `${{ secrets.FIRABASE_PROJECT_ID }}`
+- 正しい名前: `${{ secrets.FIREBASE_PROJECT_ID }}`
+
+**解決方法**: スペルミスを修正
+
+## 最終的な解決案
+
+### ワークフロー設定の改善
+
+最終的に動作した設定は以下の通り：
+
+```yaml
+- name: Prepeare Google Application Credentials
+  run: |
+    RAW="$RUNNER_TEMP/cred.raw"
+    printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > "$RAW"
+
+    # 先頭1文字が { なら生JSON、それ以外は base64 とみなして復号
+    if head -c1 "$RAW" | grep -q '{'; then
+      mv "$RAW" "$RUNNER_TEMP/key.json"
+    else
+      base64 -d "$RAW" > "$RUNNER_TEMP/key.json" || {
+        echo "Secret is neither valid JSON nor base64. Recheck FIREBASE_SERVICE_ACCOUNT_JSON."; exit 1;
+      }
+    fi
+
+    echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/key.json" >> "$GITHUB_ENV"
+
+- name: Validate service account JSON & project
+  run: |
+    sudo apt-get update && sudo apt-get install -y jq >/dev/null
+    test -s "$RUNNER_TEMP/key.json" || { echo "empty key.json (secret mising)"; exit 1; }
+    echo "SA project_id: $(jq -r '.project_id' "$RUNNER_TEMP/key.json")"
+    echo "SA type      : $(jq -r '.type' "$RUNNER_TEMP/key.json")"
+
+- name: Deploy Firebase
+  run: |
+    firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+  working-directory: todo-cicd
+```
+
+### 必要なGitHub Secrets
+
+1. **FIREBASE_SERVICE_ACCOUNT_JSON**: サービスアカウントキーのJSON（Base64エンコード版または生JSON）
+2. **FIREBASE_PROJECT_ID**: Firebaseプロジェクトの ID (`cicd-todo-app-89c3b`)
+
+## 現在の状況（解決済み）
+
+- **Build Phase**: ✅ 成功 (13秒)
+- **Test Phase**: ✅ 成功 (12秒)  
+- **Deploy Phase**: ✅ 成功 (45秒)
+
+**✅ 2025年8月16日更新**: 全てのフェーズが正常に動作し、自動デプロイが成功！
+
+## 解決の要因
+
+1. **作業ディレクトリの統一**: 全てのFirebase関連コマンドに`working-directory: todo-cicd`を追加
+2. **シークレット名の修正**: タイポ修正により正しいプロジェクトIDが参照される
+3. **堅牢なJSON処理**: Base64エンコードと生JSONの両方に対応した柔軟なシークレット処理
+4. **検証ステップの追加**: デプロイ前にサービスアカウント情報を検証
 
 ## 参考ファイル
 
@@ -173,4 +242,13 @@ wc -c < encoded_firebase_key.txt
 
 ---
 
-*最終更新: 2025年8月15日*
+## 学んだ教訓
+
+1. **細かなタイポに注意**: `FIRABASE_PROJECT_ID` のような小さなスペルミスでも致命的
+2. **作業ディレクトリの一貫性**: モノレポ構成では特に `working-directory` の設定が重要
+3. **段階的デバッグ**: エラーメッセージを正確に読み、一つずつ問題を解決
+4. **検証ステップの価値**: デプロイ前の検証により問題の早期発見が可能
+
+---
+
+*最終更新: 2025年8月16日（成功版）*
