@@ -15,7 +15,7 @@
 - Firebase Hosting
 
 
-[Demo page](cicd-todo-app-89c3b.web.app)
+[Demo page](https://cicd-todo-app-89c3b.web.app/)
 
 
 ## CICDで何をしているか？
