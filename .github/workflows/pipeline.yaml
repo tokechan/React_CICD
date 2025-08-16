@@ -86,13 +86,33 @@ jobs:
 
       - name: Prepeare Google Application Credentials
         run: |
-          echo ${{ secrets.GOOGLE_APPLICATION_CREDENTIALS }} | base64 --decode > $HOME/private-key.json
+          RAW="$RUNNER_TEMP/cred.raw"
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > "$RAW"
+
+          # 先頭1文字が { なら生JSON、それ以外は base64 とみなして復号
+          if head -c1 "$RAW" | grep -q '{'; then
+            mv "$RAW" "$RUNNER_TEMP/key.json"
+          else
+            base64 -d "$RAW" > "$RUNNER_TEMP/key.json" || {
+              echo "Secret is neither valid JSON nor base64. Recheck FIREBASE_SERVICE_ACCOUNT_JSON."; exit 1;
+            }
+          fi
+
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/key.json" >> "$GITHUB_ENV"
+
+      - name: Validate service account JSON & project
+        run: |
+          sudo apt-get update && sudo apt-get install -y jq >/dev/null
+          test -s "$RUNNER_TEMP/key.json" || { echo "empty key.json (secret mising)"; exit 1; }
+          echo "SA project_id: $(jq -r '.project_id' "$RUNNER_TEMP/key.json")"
+          echo "SA type      : $(jq -r '.type' "$RUNNER_TEMP/key.json")"
+
+
 
       - name: Deploy Firebase
         run: |
-          export GOOGLE_APPLICATION_CREDENTIALS=$HOME/private-key.json
-          firebase experiments:enable webframeworks
-          firebase deploy --only hosting
+          firebase deploy --only hosting --project ${{ secrets.FIRABASE_PROJECT_ID }} --non-interactive
+
       - name: Remove private key
         if: always()
-        run: rm $HOME/private-key.json
+        run: rm $RUNNER_TEMP/key.json
