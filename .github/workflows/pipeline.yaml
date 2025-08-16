@@ -111,7 +111,8 @@ jobs:
 
       - name: Deploy Firebase
         run: |
-          firebase deploy --only hosting --project ${{ secrets.FIRABASE_PROJECT_ID }} --non-interactive
+          firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+        working-directory: todo-cicd
 
       - name: Remove private key
         if: always()
