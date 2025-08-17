@@ -1,6 +1,6 @@
 // Todo関連の型定義
 export interface Todo {
-  id: string
+  id: number  // バックエンドに合わせてnumberに統一
   title: string
   completed: boolean
   createdAt: string

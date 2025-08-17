@@ -6,8 +6,11 @@
   "main": "dist/index.js",
   "scripts": {
     "dev": "tsx watch src/index.ts",
+    "dev:workers": "wrangler dev",
     "build": "tsc",
     "start": "node dist/index.js",
+    "deploy": "wrangler deploy",
+    "deploy:staging": "wrangler deploy --env staging",
     "test": "vitest",
     "lint": "eslint . --ext .ts",
     "type-check": "tsc --noEmit"
