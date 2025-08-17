@@ -71,3 +71,26 @@ $ git show <commit_hash> -- frontend/package.json
 * **原因**: TailwindCSS/Plugin 4.1.0 + LightningCSS バージョン固定で CI 環境のネイティブバイナリを解決出来なくなった。
 * **対処**: 4.1.12 に戻し overrides を削除すれば CI が再び成功する。
 * **教訓**: ネイティブバイナリを含む依存は *patch/minor* の違いでも CI で壊れることがある。CI 失敗時は直前の依存バージョン変更をまず疑う。
+
+---
+
+## 7. 実施した最終ワークアラウンド (CI 成功)
+
+```jsonc
+// frontend/package.json
+{
+  // ...
+  "optionalDependencies": {
+    "lightningcss-linux-x64-gnu": "^1.29.1"
+  }
+}
+```
+
+* Linux ランナーではネイティブバイナリ `lightningcss.linux-x64-gnu.node` が必ずインストールされる。
+* macOS / Windows 環境ではスキップされるため、ローカル開発に影響なし。
+* **結果**: Node20 + TailwindCSS 4.1.12 のまま CI ビルドがグリーンになった。
+
+### CI ワークフロー変更点
+環境変数追加は不要になったため、最終的な `.github/workflows/pipeline.yaml` は元のまま (Node20) で OK。
+
+---
