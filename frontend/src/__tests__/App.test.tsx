@@ -71,7 +71,7 @@ describe("App (API 連携版)", () => {
       updatedAt: new Date().toISOString(),
     };
     mockApi.fetchTodos.mockResolvedValue([initialTodo]);
-    mockApi.updateTodo.mockImplementation(async (id: number, updates) => ({
+    mockApi.updateTodo.mockImplementation(async (_id: number, updates) => ({
       ...initialTodo,
       ...updates,
       updatedAt: new Date().toISOString(),
