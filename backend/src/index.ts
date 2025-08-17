@@ -6,7 +6,7 @@ import { prettyJSON } from 'hono/pretty-json'
 
 // Types (後でshared/に移動予定)
 interface Todo {
-  id: string
+  id: number
   title: string
   completed: boolean
   createdAt: string
@@ -14,16 +14,17 @@ interface Todo {
 }
 
 // In-memory storage (後でDBに変更予定)
+let nextId = 3; // ID管理用カウンター
 let todos: Todo[] = [
   {
-    id: '1',
+    id: 1,
     title: 'CI/CDパイプラインを学ぶ',
     completed: true,
     createdAt: new Date().toISOString(),
     updatedAt: new Date().toISOString()
   },
   {
-    id: '2', 
+    id: 2, 
     title: 'Honoでバックエンドを作る',
     completed: false,
     createdAt: new Date().toISOString(),
@@ -71,7 +72,7 @@ app.post('/api/todos', async (c) => {
   }
 
   const newTodo: Todo = {
-    id: Math.random().toString(36).substr(2, 9),
+    id: nextId++,
     title: title.trim(),
     completed: false,
     createdAt: new Date().toISOString(),
@@ -83,8 +84,12 @@ app.post('/api/todos', async (c) => {
 })
 
 app.put('/api/todos/:id', async (c) => {
-  const id = c.req.param('id')
+  const id = parseInt(c.req.param('id'))
   const { title, completed } = await c.req.json()
+
+  if (isNaN(id)) {
+    return c.json({ error: 'Invalid ID' }, 400)
+  }
 
   const todoIndex = todos.findIndex(todo => todo.id === id)
   if (todoIndex === -1) {
@@ -103,7 +108,12 @@ app.put('/api/todos/:id', async (c) => {
 })
 
 app.delete('/api/todos/:id', (c) => {
-  const id = c.req.param('id')
+  const id = parseInt(c.req.param('id'))
+  
+  if (isNaN(id)) {
+    return c.json({ error: 'Invalid ID' }, 400)
+  }
+
   const todoIndex = todos.findIndex(todo => todo.id === id)
   
   if (todoIndex === -1) {
