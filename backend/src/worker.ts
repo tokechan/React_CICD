@@ -129,20 +129,3 @@ app.delete('/api/todos/:id', (c) => {
 
 // Cloudflare Workers 用のexport
 export default app
-
-// ローカル開発用 (Node.js) - Workers環境では実行されない
-// @ts-ignore
-if (typeof globalThis.process !== 'undefined' && !globalThis.navigator?.userAgent?.includes('Cloudflare-Workers')) {
-  // Dynamic import で Workers 環境での解析を回避
-  import('@hono/node-server').then(({ serve }) => {
-    const port = globalThis.process.env.PORT ? parseInt(globalThis.process.env.PORT) : 3001
-    
-    console.log(`🔥 Hono server starting on port ${port}`)
-    serve({
-      fetch: app.fetch,
-      port: port
-    })
-  }).catch(() => {
-    // Workers環境では @hono/node-server が利用できないので何もしない
-  })
-}
