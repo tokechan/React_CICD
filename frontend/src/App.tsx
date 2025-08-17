@@ -1,37 +1,71 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { fetchTodos, createTodo, updateTodo } from "./api/todoApi";
 
 type Todo = {
   id: number;
   title: string;
   completed: boolean;
+  createdAt: string;
+  updatedAt: string;
 };
 
 
 function App() {
   const [title, setTitle] = useState(""); 
   const [todos, setTodos] = useState<Todo[]>([]);
- 
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
 
-  const handleAddTodo = () => {
+  // 初期データ取得
+  useEffect(() => {
+    const loadTodos = async () => {
+      try {
+        setLoading(true);
+        const fetchedTodos = await fetchTodos();
+        setTodos(fetchedTodos);
+        setError("");
+      } catch (err) {
+        setError("データの取得に失敗しました");
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTodos();
+  }, []);
+
+  const handleAddTodo = async () => {
     if (title.trim()) {
-    setTodos([
-      ...todos,
-      {
-        id: todos.length + 1,
-        title: title,
-        completed: false,
-      },
-    ]);
-    setTitle("");
+      try {
+        const newTodo = await createTodo(title.trim());
+        setTodos([...todos, newTodo]);
+        setTitle("");
+        setError("");
+      } catch (err) {
+        setError("Todoの追加に失敗しました");
+        console.error(err);
+      }
     }
   };
 
-  const handleToggleTodo = (id: number) => {
-    setTodos(
-      todos.map((todo) => 
-        todo.id === id ? { ...todo, completed: !todo.completed }: todo
-      )
-    );
+  const handleToggleTodo = async (id: number) => {
+    try {
+      const todoToUpdate = todos.find(todo => todo.id === id);
+      if (!todoToUpdate) return;
+      
+      const updatedTodo = await updateTodo(id, { 
+        completed: !todoToUpdate.completed 
+      });
+      
+      setTodos(todos.map(todo => 
+        todo.id === id ? updatedTodo : todo
+      ));
+      setError("");
+    } catch (err) {
+      setError("Todoの更新に失敗しました");
+      console.error(err);
+    }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -47,6 +81,12 @@ function App() {
           <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
             🧺 家事チェッカー
           </h1>
+
+          {error && (
+            <div className="mb-4 p-3 bg-red-100 border border-red-400 text-red-700 rounded">
+              {error}
+            </div>
+          )}
 
           <div className="flex gap-2 mb-6">
             <input 
@@ -67,7 +107,11 @@ function App() {
             </button>
           </div>
 
-          {todos.length === 0 ? (
+          {loading ? (
+            <div className="text-center text-gray-500 py-8">
+              <p className="text-lg">読み込み中...</p>
+            </div>
+          ) : todos.length === 0 ? (
             <div className="text-center text-gray-500 py-8">
               <p className="text-lg">全て終わったよーー👌</p>
               <p className="text-sm">共有事項を入れる？</p>
