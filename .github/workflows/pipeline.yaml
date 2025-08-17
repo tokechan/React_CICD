@@ -25,6 +25,8 @@ jobs:
         working-directory: frontend
 
       - name: Build application
+        env:
+          TAILWIND_DISABLE_LIGHTNINGCSS: "1"
         run: npm run build
         working-directory: frontend
 
@@ -56,6 +58,8 @@ jobs:
         working-directory: frontend
 
       - name: Run tests
+        env:
+          TAILWIND_DISABLE_LIGHTNINGCSS: "1"
         run: npm run test
         working-directory: frontend
 
