@@ -1,0 +1,46 @@
+{
+  "name": "todo-app-monorepo",
+  "version": "1.0.0",
+  "description": "Todo App with CI/CD Pipeline - Monorepo Architecture",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend",
+    "shared"
+  ],
+  "scripts": {
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "dev:backend": "npm run dev --workspace=backend",
+    "build:frontend": "npm run build --workspace=frontend",
+    "build:backend": "npm run build --workspace=backend",
+    "test:frontend": "npm run test --workspace=frontend",
+    "test:backend": "npm run test --workspace=backend",
+    "test": "npm run test --workspaces --if-present",
+    "lint:frontend": "npm run lint --workspace=frontend",
+    "lint:backend": "npm run lint --workspace=backend",
+    "lint": "npm run lint --workspaces --if-present",
+    "install:all": "npm install",
+    "clean": "npm run clean --workspaces --if-present",
+    "deploy:frontend": "npm run deploy --workspace=frontend"
+  },
+  "devDependencies": {
+    "@types/node": "^20.0.0"
+  },
+  "engines": {
+    "node": ">=18.0.0",
+    "npm": ">=8.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/tokechan/React_CICD.git"
+  },
+  "keywords": [
+    "todo",
+    "react",
+    "monorepo",
+    "ci-cd",
+    "firebase"
+  ],
+  "author": "tokechan",
+  "license": "MIT"
+}

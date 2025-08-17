@@ -1,0 +1,18 @@
+{
+  "name": "todo-shared",
+  "version": "1.0.0",
+  "description": "Shared types and utilities for Todo App",
+  "type": "module",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "type-check": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "typescript": "^5.6.3"
+  },
+  "files": [
+    "dist/**/*"
+  ]
+}
