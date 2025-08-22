@@ -1,0 +1,36 @@
+{
+  "version": "48.0.0",
+  "files": {
+    "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6": {
+      "displayName": "TodoAppFrontendStack/Custom::S3AutoDeleteObjectsCustomResourceProvider Code",
+      "source": {
+        "path": "asset.faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6",
+        "packaging": "zip"
+      },
+      "destinations": {
+        "707236141338-us-east-1-46b54fe5": {
+          "bucketName": "cdk-hnb659fds-assets-707236141338-us-east-1",
+          "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-file-publishing-role-707236141338-us-east-1"
+        }
+      }
+    },
+    "f53dad57001d30e8cc34437700c0e350c9aa34867bfb06e66989b9326d98079c": {
+      "displayName": "TodoAppFrontendStack Template",
+      "source": {
+        "path": "TodoAppFrontendStack.template.json",
+        "packaging": "file"
+      },
+      "destinations": {
+        "707236141338-us-east-1-996f1c49": {
+          "bucketName": "cdk-hnb659fds-assets-707236141338-us-east-1",
+          "objectKey": "f53dad57001d30e8cc34437700c0e350c9aa34867bfb06e66989b9326d98079c.json",
+          "region": "us-east-1",
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-file-publishing-role-707236141338-us-east-1"
+        }
+      }
+    }
+  },
+  "dockerImages": {}
+}

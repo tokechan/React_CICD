@@ -1,0 +1,104 @@
+name: Deploy Frontend to AWS S3 + CloudFront
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'infra/cdk/**'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'frontend/**'
+      - 'infra/cdk/**'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'push' # プッシュ時のみデプロイ
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: |
+            frontend/package-lock.json
+            infra/cdk/package-lock.json
+
+      - name: Install frontend dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: Get CloudFormation outputs
+        id: cf-outputs
+        run: |
+          # CDKスタックから出力値を取得
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
+
+          echo "bucket-name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution-id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+
+      - name: Deploy to S3
+        run: |
+          cd frontend
+          aws s3 sync dist/ s3://${{ steps.cf-outputs.outputs.bucket-name }} --delete --cache-control max-age=31536000,public
+
+      - name: Invalidate CloudFront cache
+        run: |
+          aws cloudfront create-invalidation --distribution-id ${{ steps.cf-outputs.outputs.distribution-id }} --paths "/*"
+
+      - name: Get CloudFront URL
+        id: cf-url
+        run: |
+          DISTRIBUTION_DOMAIN=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='DistributionDomainName'].OutputValue" --output text)
+          echo "cloudfront-url=https://$DISTRIBUTION_DOMAIN" >> $GITHUB_OUTPUT
+
+      - name: Comment deployment URL
+        uses: actions/github-script@v7
+        with:
+          script: |
+            github.rest.issues.createComment({
+              issue_number: context.issue.number,
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              body: `🚀 Frontend deployed successfully!\n\n**URL:** ${{ steps.cf-url.outputs.cloudfront-url }}\n\n**S3 Bucket:** ${{ steps.cf-outputs.outputs.bucket-name }}\n**CloudFront ID:** ${{ steps.cf-outputs.outputs.distribution-id }}`
+            })
+
+  build-only:
+    runs-on: ubuntu-latest
+    if: github.event_name == 'pull_request' # PR時はビルドのみ
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install dependencies
+        run: cd frontend && npm ci
+
+      - name: Build frontend
+        run: cd frontend && npm run build
+
+      - name: Run tests
+        run: cd frontend && npm run test

@@ -1,0 +1,71 @@
+name: Deploy Infrastructure with CDK
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'infra/cdk/**'
+  workflow_dispatch: # 手動実行可能
+
+jobs:
+  deploy-infra:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+          cache-dependency-path: infra/cdk/package-lock.json
+
+      - name: Install CDK dependencies
+        run: cd infra/cdk && npm ci
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ secrets.AWS_REGION }}
+
+      - name: CDK Bootstrap (初回のみ)
+        run: cd infra/cdk && npx cdk bootstrap --require-approval never
+        continue-on-error: true # 既にブートストラップ済みの場合はエラーを無視
+
+      - name: CDK Synth
+        run: cd infra/cdk && npx cdk synth
+
+      - name: CDK Deploy
+        run: cd infra/cdk && npx cdk deploy --require-approval never
+
+      - name: Get deployment outputs
+        id: cf-outputs
+        run: |
+          cd infra/cdk
+          # CloudFormationの出力値を取得
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
+          DISTRIBUTION_DOMAIN=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='DistributionDomainName'].OutputValue" --output text)
+
+          echo "bucket-name=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "distribution-id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
+          echo "cloudfront-url=https://$DISTRIBUTION_DOMAIN" >> $GITHUB_OUTPUT
+
+      - name: Create deployment summary
+        run: |
+          echo "## 🚀 Infrastructure Deployed Successfully!" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "**S3 Bucket:** ${{ steps.cf-outputs.outputs.bucket-name }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CloudFront ID:** ${{ steps.cf-outputs.outputs.distribution-id }}" >> $GITHUB_STEP_SUMMARY
+          echo "**CloudFront URL:** ${{ steps.cf-outputs.outputs.cloudfront-url }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next Steps:" >> $GITHUB_STEP_SUMMARY
+          echo "1. GitHub Secretsに以下の値を設定:" >> $GITHUB_STEP_SUMMARY
+          echo "   - AWS_ACCESS_KEY_ID" >> $GITHUB_STEP_SUMMARY
+          echo "   - AWS_SECRET_ACCESS_KEY" >> $GITHUB_STEP_SUMMARY
+          echo "   - AWS_REGION" >> $GITHUB_STEP_SUMMARY
+          echo "2. Frontendデプロイワークフローが自動的に実行されます" >> $GITHUB_STEP_SUMMARY
