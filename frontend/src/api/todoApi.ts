@@ -1,7 +1,10 @@
 // Todo API Client (simple fetch version)
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://todo-app-backend.your-subdomain.workers.dev'  // 本番 URL
-  : 'http://localhost:3001'  // 開発 URL
+// 環境変数 VITE_API_BASE_URL でAPIエンドポイントを指定可能
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? 'https://your-api-id.execute-api.region.amazonaws.com/prod'  // AWS API Gateway URL
+    : 'http://localhost:3001'  // 開発 URL
+  )
 
 // 型定義（クライアント側専用）
 export interface Todo {
