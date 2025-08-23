@@ -109,17 +109,17 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-707236141338-us-east-1",
-     "S3Key": "d70dc47a88d107e1f3e88260d89a09ddf853b20e9a35ecece1038aec3cef0340.zip"
+     "S3Key": "87af1a9700b7bc4bf93eb5bb7f814821d5521593fd9101fc918f9c0e560f453e.zip"
     },
     "Environment": {
      "Variables": {
       "TABLE_NAME": {
        "Ref": "TodoTable585F1D6B"
       },
-      "DEPLOY_TIMESTAMP": "1755961140354"
+      "DEPLOY_TIMESTAMP": "1755961583768"
      }
     },
-    "Handler": "worker.handler",
+    "Handler": "dist/worker.handler",
     "MemorySize": 256,
     "Role": {
      "Fn::GetAtt": [
@@ -136,7 +136,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoFunction/Resource",
-    "aws:asset:path": "asset.d70dc47a88d107e1f3e88260d89a09ddf853b20e9a35ecece1038aec3cef0340",
+    "aws:asset:path": "asset.87af1a9700b7bc4bf93eb5bb7f814821d5521593fd9101fc918f9c0e560f453e",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -206,7 +206,7 @@
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/Account"
    }
   },
-  "TodoApiDeployment88898756b15b3ea4076a5bc7f48252b68552d4f3": {
+  "TodoApiDeployment888987568ee57e48e0a92dd00b06e2a54ee2757a": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Todo application API",
@@ -215,11 +215,8 @@
     }
    },
    "DependsOn": [
-    "TodoApiDELETE8A3F5C8E",
-    "TodoApiGET1490360D",
-    "TodoApiOPTIONS40528783",
-    "TodoApiPOST5E97708A",
-    "TodoApiPUT2F638C8D"
+    "TodoApiANY0FB9F7F5",
+    "TodoApiOPTIONS40528783"
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/Deployment/Resource",
@@ -230,16 +227,8 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "TodoApiDeployment88898756b15b3ea4076a5bc7f48252b68552d4f3"
+     "Ref": "TodoApiDeployment888987568ee57e48e0a92dd00b06e2a54ee2757a"
     },
-    "MethodSettings": [
-     {
-      "DataTraceEnabled": false,
-      "HttpMethod": "*",
-      "LoggingLevel": "INFO",
-      "ResourcePath": "/*"
-     }
-    ],
     "RestApiId": {
      "Ref": "TodoApi145E2E30"
     },
@@ -298,7 +287,7 @@
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/OPTIONS/Resource"
    }
   },
-  "TodoApiGETApiPermissionTodoAppBackendStackTodoApiF4753596GET5A7A77DA": {
+  "TodoApiANYApiPermissionTodoAppBackendStackTodoApiF4753596ANY21FC63A2": {
    "Type": "AWS::Lambda::Permission",
    "Properties": {
     "Action": "lambda:InvokeFunction",
@@ -325,16 +314,16 @@
        {
         "Ref": "TodoApiDeploymentStageprod8FC2974F"
        },
-       "/GET/"
+       "/*/"
       ]
      ]
     }
    },
    "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/GET/ApiPermission.TodoAppBackendStackTodoApiF4753596.GET.."
+    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/ANY/ApiPermission.TodoAppBackendStackTodoApiF4753596.ANY.."
    }
   },
-  "TodoApiGETApiPermissionTestTodoAppBackendStackTodoApiF4753596GET213F6C7C": {
+  "TodoApiANYApiPermissionTestTodoAppBackendStackTodoApiF4753596ANY13D98038": {
    "Type": "AWS::Lambda::Permission",
    "Properties": {
     "Action": "lambda:InvokeFunction",
@@ -357,20 +346,20 @@
        {
         "Ref": "TodoApi145E2E30"
        },
-       "/test-invoke-stage/GET/"
+       "/test-invoke-stage/*/"
       ]
      ]
     }
    },
    "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/GET/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.GET.."
+    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/ANY/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.ANY.."
    }
   },
-  "TodoApiGET1490360D": {
+  "TodoApiANY0FB9F7F5": {
    "Type": "AWS::ApiGateway::Method",
    "Properties": {
     "AuthorizationType": "NONE",
-    "HttpMethod": "GET",
+    "HttpMethod": "ANY",
     "Integration": {
      "IntegrationHttpMethod": "POST",
      "Type": "AWS_PROXY",
@@ -405,337 +394,7 @@
     }
    },
    "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/GET/Resource"
-   }
-  },
-  "TodoApiPOSTApiPermissionTodoAppBackendStackTodoApiF4753596POST09294A54": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/",
-       {
-        "Ref": "TodoApiDeploymentStageprod8FC2974F"
-       },
-       "/POST/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/POST/ApiPermission.TodoAppBackendStackTodoApiF4753596.POST.."
-   }
-  },
-  "TodoApiPOSTApiPermissionTestTodoAppBackendStackTodoApiF4753596POST0456C02C": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/test-invoke-stage/POST/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/POST/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.POST.."
-   }
-  },
-  "TodoApiPOST5E97708A": {
-   "Type": "AWS::ApiGateway::Method",
-   "Properties": {
-    "AuthorizationType": "NONE",
-    "HttpMethod": "POST",
-    "Integration": {
-     "IntegrationHttpMethod": "POST",
-     "Type": "AWS_PROXY",
-     "Uri": {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
-        {
-         "Fn::GetAtt": [
-          "TodoFunctionBCE690F1",
-          "Arn"
-         ]
-        },
-        "/invocations"
-       ]
-      ]
-     }
-    },
-    "ResourceId": {
-     "Fn::GetAtt": [
-      "TodoApi145E2E30",
-      "RootResourceId"
-     ]
-    },
-    "RestApiId": {
-     "Ref": "TodoApi145E2E30"
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/POST/Resource"
-   }
-  },
-  "TodoApiPUTApiPermissionTodoAppBackendStackTodoApiF4753596PUTAFA60085": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/",
-       {
-        "Ref": "TodoApiDeploymentStageprod8FC2974F"
-       },
-       "/PUT/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/PUT/ApiPermission.TodoAppBackendStackTodoApiF4753596.PUT.."
-   }
-  },
-  "TodoApiPUTApiPermissionTestTodoAppBackendStackTodoApiF4753596PUTF5967770": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/test-invoke-stage/PUT/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/PUT/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.PUT.."
-   }
-  },
-  "TodoApiPUT2F638C8D": {
-   "Type": "AWS::ApiGateway::Method",
-   "Properties": {
-    "AuthorizationType": "NONE",
-    "HttpMethod": "PUT",
-    "Integration": {
-     "IntegrationHttpMethod": "POST",
-     "Type": "AWS_PROXY",
-     "Uri": {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
-        {
-         "Fn::GetAtt": [
-          "TodoFunctionBCE690F1",
-          "Arn"
-         ]
-        },
-        "/invocations"
-       ]
-      ]
-     }
-    },
-    "ResourceId": {
-     "Fn::GetAtt": [
-      "TodoApi145E2E30",
-      "RootResourceId"
-     ]
-    },
-    "RestApiId": {
-     "Ref": "TodoApi145E2E30"
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/PUT/Resource"
-   }
-  },
-  "TodoApiDELETEApiPermissionTodoAppBackendStackTodoApiF4753596DELETE5806626E": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/",
-       {
-        "Ref": "TodoApiDeploymentStageprod8FC2974F"
-       },
-       "/DELETE/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/DELETE/ApiPermission.TodoAppBackendStackTodoApiF4753596.DELETE.."
-   }
-  },
-  "TodoApiDELETEApiPermissionTestTodoAppBackendStackTodoApiF4753596DELETE36786815": {
-   "Type": "AWS::Lambda::Permission",
-   "Properties": {
-    "Action": "lambda:InvokeFunction",
-    "FunctionName": {
-     "Fn::GetAtt": [
-      "TodoFunctionBCE690F1",
-      "Arn"
-     ]
-    },
-    "Principal": "apigateway.amazonaws.com",
-    "SourceArn": {
-     "Fn::Join": [
-      "",
-      [
-       "arn:",
-       {
-        "Ref": "AWS::Partition"
-       },
-       ":execute-api:us-east-1:707236141338:",
-       {
-        "Ref": "TodoApi145E2E30"
-       },
-       "/test-invoke-stage/DELETE/"
-      ]
-     ]
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/DELETE/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.DELETE.."
-   }
-  },
-  "TodoApiDELETE8A3F5C8E": {
-   "Type": "AWS::ApiGateway::Method",
-   "Properties": {
-    "AuthorizationType": "NONE",
-    "HttpMethod": "DELETE",
-    "Integration": {
-     "IntegrationHttpMethod": "POST",
-     "Type": "AWS_PROXY",
-     "Uri": {
-      "Fn::Join": [
-       "",
-       [
-        "arn:",
-        {
-         "Ref": "AWS::Partition"
-        },
-        ":apigateway:us-east-1:lambda:path/2015-03-31/functions/",
-        {
-         "Fn::GetAtt": [
-          "TodoFunctionBCE690F1",
-          "Arn"
-         ]
-        },
-        "/invocations"
-       ]
-      ]
-     }
-    },
-    "ResourceId": {
-     "Fn::GetAtt": [
-      "TodoApi145E2E30",
-      "RootResourceId"
-     ]
-    },
-    "RestApiId": {
-     "Ref": "TodoApi145E2E30"
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/DELETE/Resource"
+    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/ANY/Resource"
    }
   },
   "CDKMetadata": {
