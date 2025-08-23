@@ -118,7 +118,7 @@ app.get('/api.todos', async (c) => {
   }
 });
 
-app.get('/api/todos', async (c) => {
+app.post('/api/todos', async (c) => {
   try {
     const body = await c.req.json();
     const { title } = body;

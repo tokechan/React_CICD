@@ -18,45 +18,17 @@ export class BackendStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY, // 開発用
     });
 
-    // Lambda関数作成
+    // Lambda関数作成 - esbuildで完全にバンドル済み
     const lambdaFunction = new lambda.Function(this, 'TodoFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('../../backend/dist'),
       handler: 'worker.handler',
       environment: {
         TABLE_NAME: table.tableName,
-        DEPLOY_TIMESTAMP: Date.now().toString(), // 強制的に新しいデプロイをトリガー
+        DEPLOY_TIMESTAMP: Date.now().toString(),
       },
       timeout: Duration.seconds(30),
       memorySize: 256,
-      bundling: {
-        minify: true,
-        sourceMap: true,
-        target: 'node18',
-        loader: {
-          '.js': 'js',
-          '.ts': 'ts',
-        },
-        define: {
-          'process.env.NODE_ENV': '"production"',
-        },
-        banner: {
-          js: '// Lambda function bundled with esbuild',
-        },
-        external: [],
-        nodeModules: ['hono', '@aws-sdk/client-dynamodb', '@aws-sdk/lib-dynamodb'],
-        commandHooks: {
-          beforeBundling(inputDir: string, outputDir: string): string[] {
-            return [];
-          },
-          afterBundling(inputDir: string, outputDir: string): string[] {
-            return [];
-          },
-          beforeInstall(inputDir: string, outputDir: string): string[] {
-            return [];
-          },
-        },
-      },
     });
 
     // DynamoDBアクセス権限付与
@@ -72,27 +44,26 @@ export class BackendStack extends Stack {
       },
     });
 
-    // CORS設定
+    // CORS設定 - ルートレベルで設定
     api.root.addCorsPreflight({
-      allowOrigins: ['https://dajp3qg4bmyop.cloudfront.net'],
+      allowOrigins: ['*'], // 開発用にすべてのオリジンを許可
       allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
       allowHeaders: ['Content-Type', 'Authorization'],
     });
 
-    // Lambda統合
-    const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction);
+    // Lambda統合 - サンプルリポジトリのベストプラクティスに従う
+    const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction, {
+      proxy: true,
+    });
 
-    // APIエンドポイント設定
-    const apiResource = api.root.addResource('api');
-    const todosResource = apiResource.addResource('todos');
+    // ルートパスをLambdaにマッピング（プロキシ統合）
+    api.root.addMethod('GET', lambdaIntegration);
+    api.root.addMethod('POST', lambdaIntegration);
+    api.root.addMethod('PUT', lambdaIntegration);
+    api.root.addMethod('DELETE', lambdaIntegration);
 
-    todosResource.addMethod('GET', lambdaIntegration);
-    todosResource.addMethod('POST', lambdaIntegration);
-
-    const todoResource = todosResource.addResource('{id}');
-    todoResource.addMethod('GET', lambdaIntegration);
-    todoResource.addMethod('PUT', lambdaIntegration);
-    todoResource.addMethod('DELETE', lambdaIntegration);
+    // プロキシ統合の設定を削除して、完全にLambdaに任せる
+    // Honoがすべてのルーティングを処理するため、個別ルート設定は不要
 
     // CloudFormation Outputs
     this.exportValue(api.url, { name: 'ApiUrl' });

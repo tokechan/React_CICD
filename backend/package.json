@@ -5,7 +5,9 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "build": "tsc",
+    "build": "npm run build:esbuild",
+    "build:esbuild": "esbuild src/worker.ts --bundle --platform=node --target=node20 --outfile=dist/worker.js --format=cjs --minify --sourcemap",
+    "build:tsc": "tsc",
     "dev": "tsx watch src/worker.ts",
     "start": "node dist/worker.js",
     "deploy": "npm run build && cdk deploy TodoAppBackendStack",
