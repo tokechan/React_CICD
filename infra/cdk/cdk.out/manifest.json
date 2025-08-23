@@ -138,7 +138,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-deploy-role-707236141338-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-cfn-exec-role-707236141338-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/a9c450b12d15784293217297ff2e7ed86d8e0988268e99808369fe1823e07187.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/bd6e6fc696ca334e1ebf8bb1c553015dbc88413d384be2a96b523c423eefb2a7.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -199,7 +199,7 @@
         "/TodoAppBackendStack/TodoApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiDeployment888987568ee57e48e0a92dd00b06e2a54ee2757a"
+            "data": "TodoApiDeployment8889875605829ca1d964e25c975895469c35d628"
           }
         ],
         "/TodoAppBackendStack/TodoApi/DeploymentStage.prod/Resource": [
@@ -236,6 +236,30 @@
           {
             "type": "aws:cdk:logicalId",
             "data": "TodoApiANY0FB9F7F5"
+          }
+        ],
+        "/TodoAppBackendStack/TodoApi/Default/{proxy+}/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TodoApiproxy074250E1"
+          }
+        ],
+        "/TodoAppBackendStack/TodoApi/Default/{proxy+}/ANY/ApiPermission.TodoAppBackendStackTodoApiF4753596.ANY..{proxy+}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TodoApiproxyANYApiPermissionTodoAppBackendStackTodoApiF4753596ANYproxy8BB8CB41"
+          }
+        ],
+        "/TodoAppBackendStack/TodoApi/Default/{proxy+}/ANY/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.ANY..{proxy+}": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TodoApiproxyANYApiPermissionTestTodoAppBackendStackTodoApiF4753596ANYproxyD3D4FEC4"
+          }
+        ],
+        "/TodoAppBackendStack/TodoApi/Default/{proxy+}/ANY/Resource": [
+          {
+            "type": "aws:cdk:logicalId",
+            "data": "TodoApiproxyANY68677E75"
           }
         ],
         "/TodoAppBackendStack/ExportApiUrl": [

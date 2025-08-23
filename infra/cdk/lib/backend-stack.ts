@@ -43,11 +43,11 @@ export class BackendStack extends Stack {
       },
     });
 
-    // CORS設定 - ルートレベルで設定
+    // CORS設定 - シンプルに設定
     api.root.addCorsPreflight({
-      allowOrigins: ['*'], // 開発用にすべてのオリジンを許可
-      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-      allowHeaders: ['Content-Type', 'Authorization'],
+      allowOrigins: ['*'],
+      allowMethods: ['*'],
+      allowHeaders: ['*'],
     });
 
     // Lambda統合 - サンプルリポジトリのベストプラクティスに従う
@@ -55,8 +55,12 @@ export class BackendStack extends Stack {
       proxy: true,
     });
 
-    // 完全なプロキシ統合 - ANYメソッドですべてのリクエストをLambdaに転送
+    // ルートレベルのプロキシ統合
     api.root.addMethod('ANY', lambdaIntegration);
+
+    // プロキシリソースの設定（サンプルリポジトリのベストプラクティス）
+    const proxyResource = api.root.addResource('{proxy+}');
+    proxyResource.addMethod('ANY', lambdaIntegration);
 
     // プロキシ統合の設定を削除して、完全にLambdaに任せる
     // Honoがすべてのルーティングを処理するため、個別ルート設定は不要
