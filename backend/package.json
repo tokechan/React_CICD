@@ -5,19 +5,18 @@
   "type": "module",
   "main": "dist/index.js",
   "scripts": {
-    "dev": "tsx watch src/index.ts",
-    "dev:workers": "wrangler dev",
     "build": "tsc",
-    "start": "node dist/index.js",
-    "deploy": "wrangler deploy",
-    "deploy:staging": "wrangler deploy --env staging",
+    "dev": "tsx watch src/worker.ts",
+    "start": "node dist/worker.js",
+    "deploy": "npm run build && cdk deploy TodoAppBackendStack",
     "test": "vitest",
-    "lint": "eslint . --ext .ts",
+    "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
     "hono": "^4.6.7",
-    "@hono/node-server": "^1.13.7"
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
   },
   "devDependencies": {
     "@types/node": "^20.0.0",

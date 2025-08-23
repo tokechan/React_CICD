@@ -1,50 +1,203 @@
 import { Hono } from 'hono'
-import { cors } from 'hono/cors'
-import { logger } from 'hono/logger'
-import { prettyJSON } from 'hono/pretty-json'
+import { handle } from 'hono/aws-lambda'
+import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
+import { 
+  DynamoDBDocumentClient,
+  GetCommand,
+  PutCommand,
+  UpdateCommand,
+  DeleteCommand,
+  ScanCommand,
+} from '@aws-sdk/lib-dynamodb';
+import { table } from 'console';
 
-// Types (後でshared/に移動予定)
+// DynamoDBの設定
+const client = new DynamoDBClient({});
+const docClient = DynamoDBDocumentClient.from(client);
+const tableName = process.env.DYNAMODB_TABLE_NAME || 'TodoApp';
+
+
+//Honoのアプリケーションを作成
+const app = new Hono();
+
+// 型定義
 interface Todo {
-  id: number
+  id: string
   title: string
   completed: boolean
   createdAt: string
   updatedAt: string
 }
 
-// In-memory storage (後でDBに変更予定)
-let nextId = 3; // ID管理用カウンター
-let todos: Todo[] = [
-  {
-    id: 1,
-    title: 'CI/CDパイプラインを学ぶ',
-    completed: true,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  },
-  {
-    id: 2, 
-    title: 'Honoでバックエンドを作る',
-    completed: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
+//hepler function 
+const getTodos = async (): Promise<Todo[]> => {
+  const command = new ScanCommand({ TableName: tableName });
+  const response = await docClient.send(command);
+  return (response.Items as Todo[]) || [];
+};
+
+const getTodo = async (id: string): Promise<Todo | null> => {
+  const command = new GetCommand({
+    TableName: tableName,
+    Key: { id },
+  });
+  const response = await docClient.send(command);
+  return (response.Item as Todo) || null;
+};
+
+const createTodo = async (todo: Omit<Todo, 'createdAt' | 'updatedAt'>
+): Promise<Todo> => {
+  const now = new Date().toISOString();
+  const newTodo: Todo = {
+    ...todo,
+    createdAt: now,
+    updatedAt: now,
+  };
+
+  const command = new PutCommand({
+    TableName: tableName,
+    Item: newTodo,
+  });
+  await docClient.send(command);
+  return newTodo;
+};
+
+const updateTodo = async (
+  id: string,
+  updates: Partial<Todo>
+): Promise<Todo | null> => {
+  const existingTodo = await getTodo(id);
+  if (!existingTodo) return null;
+
+  const updatedTodo: Todo = {
+    ...existingTodo,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+
+  const command = new UpdateCommand({
+    TableName: tableName,
+    Key: { id },
+    UpdateExpression:
+     'SET title = :title, completed = :completed, updatedAt = :updatedAt',
+    ExpressionAttributeValues: {
+      ':title': updatedTodo.title,
+      ':completed': updatedTodo.completed,
+      ':updatedAt': updatedTodo.updatedAt,
+    },
+    ReturnValues: 'ALL_NEW',
+  });
+
+  const response = await docClient.send(command);
+  return (response as any).Attributes as Todo || null;
+};
+
+const deleteTodo = async (id: string): Promise<boolean> => {
+  const command = new DeleteCommand({
+    TableName: tableName,
+    Key: { id },
+  });
+
+  try {
+    await docClient.send(command);
+    return true;
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+    return false;
   }
-]
+};
 
-const app = new Hono()
+//APi endpoints
+app.get('/api.todos', async (c) => {
+  try {
+    const todos = await getTodos();
+    return c.json({ todos });
+  } catch (error) {
+    console.error('Error fetching todos:', error);
+    return c.json({ error: 'Failed to fetch todos' }, 500);
+  }
+});
 
-// Middleware
-app.use('*', logger())
-app.use('*', prettyJSON())
-app.use('/api/*', cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com'
-  ],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowHeaders: ['Content-Type']
-}))
+app.get('/api/todos', async (c) => {
+  try {
+    const body = await c.req.json();
+    const { title } = body;
+
+    if (!title || typeof title !== 'string') {
+      return c.json({ error: 'Title is required' }, 400);
+    }
+
+    const newTodo = await createTodo({
+      id: crypto.randomUUID(),
+      title: title.trim(),
+      completed: false,
+    });
+
+    return c.json({ todo: newTodo }, 201);
+  } catch (error) {
+    console.error('Error creating todo:', error);
+    return c.json({ error: 'Failed to create todo' }, 500);
+  }
+});
+
+app.get('/api/todos/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const todo = await getTodo(id);
+
+    if (!todo) {
+      return c.json({ error: 'Todo not found' }, 404);
+    }
+
+    return c.json({ todo });
+  } catch (error) {
+    console.error('Error fetching todo:', error);
+    return c.json({ error: 'Failed to fetch todo' }, 500);
+  }
+});
+
+app.put('/api/todos/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const body = await c.req.json();
+    const { title, completed } = body;
+
+    const updatedTodo = await updateTodo(id, {
+      title: title?.trim(),
+      completed,
+    });
+
+    if (!updatedTodo) {
+      return c.json({ error: 'Todo not found' }, 404);
+    }
+
+    return c.json({ todo: updatedTodo });
+  } catch (error) {
+    console.error('Error updating todo:', error);
+    return c.json({ error: 'Failed to update todo' }, 500);
+  }
+});
+
+app.delete('/api/todos/:id', async (c) => {
+  try {
+    const id = c.req.param('id');
+    const success = await deleteTodo(id);
+
+    if (!success) {
+      return c.json({ error: 'Todo not found' }, 404);
+    }
+
+    return c.json({ message: 'Todo deleted successfully' });
+  } catch (error) {
+    console.error('Error deleting todo:', error);
+    return c.json({ error: 'Failed to delete todo' }, 500);
+  }
+});
+
+//Lambda handler
+export const handler = handle(app);
+
+
 
 // Routes
 app.get('/', (c) => {
@@ -62,70 +215,7 @@ app.get('/health', (c) => {
   return c.json({ status: 'OK', timestamp: new Date().toISOString() })
 })
 
-// Todo API endpoints
-app.get('/api/todos', (c) => {
-  return c.json({ todos })
-})
 
-app.post('/api/todos', async (c) => {
-  const { title } = await c.req.json()
-  
-  if (!title || typeof title !== 'string') {
-    return c.json({ error: 'Title is required' }, 400)
-  }
-
-  const newTodo: Todo = {
-    id: nextId++,
-    title: title.trim(),
-    completed: false,
-    createdAt: new Date().toISOString(),
-    updatedAt: new Date().toISOString()
-  }
-
-  todos.push(newTodo)
-  return c.json({ todo: newTodo }, 201)
-})
-
-app.put('/api/todos/:id', async (c) => {
-  const id = parseInt(c.req.param('id'))
-  const { title, completed } = await c.req.json()
-
-  if (isNaN(id)) {
-    return c.json({ error: 'Invalid ID' }, 400)
-  }
-
-  const todoIndex = todos.findIndex(todo => todo.id === id)
-  if (todoIndex === -1) {
-    return c.json({ error: 'Todo not found' }, 404)
-  }
-
-  if (title !== undefined) {
-    todos[todoIndex].title = title
-  }
-  if (completed !== undefined) {
-    todos[todoIndex].completed = completed
-  }
-  todos[todoIndex].updatedAt = new Date().toISOString()
-
-  return c.json({ todo: todos[todoIndex] })
-})
-
-app.delete('/api/todos/:id', (c) => {
-  const id = parseInt(c.req.param('id'))
-  
-  if (isNaN(id)) {
-    return c.json({ error: 'Invalid ID' }, 400)
-  }
-
-  const todoIndex = todos.findIndex(todo => todo.id === id)
-  
-  if (todoIndex === -1) {
-    return c.json({ error: 'Todo not found' }, 404)
-  }
-
-  todos.splice(todoIndex, 1)
-  return c.json({ message: 'Todo deleted successfully' })
-})
 
 // Cloudflare Workers 用のexport
 export default app

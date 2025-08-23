@@ -1,13 +1,5 @@
 import { useState, useEffect } from "react";
-import { fetchTodos, createTodo, updateTodo } from "./api/todoApi";
-
-type Todo = {
-  id: number;
-  title: string;
-  completed: boolean;
-  createdAt: string;
-  updatedAt: string;
-};
+import { fetchTodos, createTodo, updateTodo, type Todo } from "./api/todoApi";
 
 
 function App() {
@@ -49,7 +41,7 @@ function App() {
     }
   };
 
-  const handleToggleTodo = async (id: number) => {
+  const handleToggleTodo = async (id: string) => {
     try {
       const todoToUpdate = todos.find(todo => todo.id === id);
       if (!todoToUpdate) return;
