@@ -1,0 +1,152 @@
+name: Deploy Frontend (AWS or Firebase)
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: 'Where to deploy?'
+        type: choice
+        options:
+          - aws
+          - firebase
+        required: true
+        default: aws
+      invalidate_cf:
+        description: 'AWS: Invalidate CloudFront after upload'
+        type: boolean
+        required: false
+        default: true
+      aws_region:
+        description: 'AWS region (for AWS only)'
+        type: string
+        required: false
+        default: us-east-1
+      stack_name:
+        description: 'AWS CDK stack name (for AWS only)'
+        type: string
+        required: false
+        default: TodoAppFrontendStack
+
+concurrency:
+  group: production-deploy
+  cancel-in-progress: false
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build frontend
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install
+        run: npm ci
+        working-directory: frontend
+
+      - name: Build
+        env:
+          TAILWIND_DISABLE_LIGHTNINGCSS: '1'
+        run: npm run build
+        working-directory: frontend
+
+      - name: Upload build artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-dist
+          path: frontend/dist/
+          retention-days: 1
+
+  deploy_aws:
+    name: Deploy to AWS S3 + CloudFront
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ inputs.target == 'aws' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: frontend/dist/
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Fetch CloudFormation outputs
+        id: cf
+        run: |
+          STACK="${{ inputs.stack_name }}"
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='ExportWebsiteBucketName'].OutputValue" --output text)
+          DIST_ID=$(aws cloudformation describe-stacks --stack-name "$STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='ExportDistributionId'].OutputValue" --output text)
+
+          echo "bucket=$BUCKET_NAME" >> $GITHUB_OUTPUT
+          echo "dist_id=$DIST_ID" >> $GITHUB_OUTPUT
+
+      - name: Upload to S3
+        run: |
+          aws s3 sync frontend/dist/ s3://${{ steps.cf.outputs.bucket }} \
+            --delete --cache-control max-age=31536000,public
+
+      - name: Invalidate CloudFront
+        if: ${{ inputs.invalidate_cf }}
+        run: |
+          aws cloudfront create-invalidation \
+            --distribution-id ${{ steps.cf.outputs.dist_id }} \
+            --paths "/*"
+
+  deploy_firebase:
+    name: Deploy to Firebase Hosting
+    runs-on: ubuntu-latest
+    needs: build
+    if: ${{ inputs.target == 'firebase' }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Download build artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: build-dist
+          path: frontend/dist/
+
+      - name: Install Firebase CLI
+        run: curl -sL https://firebase.tools | bash
+
+      - name: Prepare Google Application Credentials
+        run: |
+          RAW="$RUNNER_TEMP/cred.raw"
+          printf '%s' '${{ secrets.FIREBASE_SERVICE_ACCOUNT_JSON }}' > "$RAW"
+          if head -c1 "$RAW" | grep -q '{'; then
+            mv "$RAW" "$RUNNER_TEMP/key.json"
+          else
+            base64 -d "$RAW" > "$RUNNER_TEMP/key.json" || { echo "Secret invalid"; exit 1; }
+          fi
+          echo "GOOGLE_APPLICATION_CREDENTIALS=$RUNNER_TEMP/key.json" >> "$GITHUB_ENV"
+
+      - name: Deploy
+        run: |
+          export PATH="$PATH:$HOME/.local/bin"
+          firebase deploy --only hosting --project ${{ secrets.FIREBASE_PROJECT_ID }} --non-interactive
+        working-directory: frontend
+
+      - name: Cleanup
+        if: always()
+        run: rm -f $RUNNER_TEMP/key.json

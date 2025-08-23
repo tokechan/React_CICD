@@ -1,11 +1,14 @@
 // Todo API Client (simple fetch version)
-const API_BASE_URL = import.meta.env.PROD 
-  ? 'https://todo-app-backend.your-subdomain.workers.dev'  // 本番 URL
-  : 'http://localhost:3001'  // 開発 URL
+// 環境変数 VITE_API_BASE_URL でAPIエンドポイントを指定可能
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL ||
+  (import.meta.env.PROD
+    ? 'https://your-api-id.execute-api.region.amazonaws.com/prod'  // AWS API Gateway URL
+    : 'http://localhost:3001'  // 開発 URL
+  )
 
 // 型定義（クライアント側専用）
 export interface Todo {
-  id: number
+  id: string  // バックエンドに合わせてstring型に変更
   title: string
   completed: boolean
   createdAt: string
@@ -36,7 +39,7 @@ export const createTodo = async (title: string): Promise<Todo> => {
   return data.todo as Todo
 }
 
-export const updateTodo = async (id: number, updates: UpdateTodoRequest): Promise<Todo> => {
+export const updateTodo = async (id: string, updates: UpdateTodoRequest): Promise<Todo> => {
   const res = await fetch(`${API_BASE_URL}/api/todos/${id}`, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
@@ -47,7 +50,7 @@ export const updateTodo = async (id: number, updates: UpdateTodoRequest): Promis
   return data.todo as Todo
 }
 
-export const deleteTodo = async (id: number): Promise<void> => {
+export const deleteTodo = async (id: string): Promise<void> => {
   const res = await fetch(`${API_BASE_URL}/api/todos/${id}`, { method: 'DELETE' })
   if (!res.ok) throw new Error('Failed to delete todo')
 }

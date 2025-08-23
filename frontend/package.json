@@ -8,7 +8,10 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "vitest",
+    "deploy:s3": "npm run build && aws s3 sync dist/ s3://$npm_config_bucket --delete --cache-control max-age=31536000,public",
+    "invalidate:cloudfront": "aws cloudfront create-invalidation --distribution-id $npm_config_distribution_id --paths '/*'",
+    "deploy:frontend": "npm run deploy:s3 && npm run invalidate:cloudfront"
   },
   "dependencies": {
     "react": "^19.1.1",
