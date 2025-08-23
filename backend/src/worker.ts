@@ -108,7 +108,7 @@ const deleteTodo = async (id: string): Promise<boolean> => {
 };
 
 //APi endpoints
-app.get('/api.todos', async (c) => {
+app.get('/api/todos', async (c) => {
   try {
     const todos = await getTodos();
     return c.json({ todos });
