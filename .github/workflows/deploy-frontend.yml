@@ -47,8 +47,8 @@ jobs:
         id: cf-outputs
         run: |
           # CDKスタックから出力値を取得
-          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='WebsiteBucketName'].OutputValue" --output text)
-          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='DistributionId'].OutputValue" --output text)
+          BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='ExportWebsiteBucketName'].OutputValue" --output text)
+          DISTRIBUTION_ID=$(aws cloudformation describe-stacks --stack-name TodoAppFrontendStack --query "Stacks[0].Outputs[?OutputKey=='ExportDistributionId'].OutputValue" --output text)
 
           echo "bucket-name=$BUCKET_NAME" >> $GITHUB_OUTPUT
           echo "distribution-id=$DISTRIBUTION_ID" >> $GITHUB_OUTPUT
