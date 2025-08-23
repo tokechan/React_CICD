@@ -1,7 +1,42 @@
-import { Hono } from 'hono';
-import { cors } from 'hono/cors';
-import { logger } from 'hono/logger';
-import { prettyJSON } from 'hono/pretty-json';
+"use strict";
+var __createBinding = (this && this.__createBinding) || (Object.create ? (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    var desc = Object.getOwnPropertyDescriptor(m, k);
+    if (!desc || ("get" in desc ? !m.__esModule : desc.writable || desc.configurable)) {
+      desc = { enumerable: true, get: function() { return m[k]; } };
+    }
+    Object.defineProperty(o, k2, desc);
+}) : (function(o, m, k, k2) {
+    if (k2 === undefined) k2 = k;
+    o[k2] = m[k];
+}));
+var __setModuleDefault = (this && this.__setModuleDefault) || (Object.create ? (function(o, v) {
+    Object.defineProperty(o, "default", { enumerable: true, value: v });
+}) : function(o, v) {
+    o["default"] = v;
+});
+var __importStar = (this && this.__importStar) || (function () {
+    var ownKeys = function(o) {
+        ownKeys = Object.getOwnPropertyNames || function (o) {
+            var ar = [];
+            for (var k in o) if (Object.prototype.hasOwnProperty.call(o, k)) ar[ar.length] = k;
+            return ar;
+        };
+        return ownKeys(o);
+    };
+    return function (mod) {
+        if (mod && mod.__esModule) return mod;
+        var result = {};
+        if (mod != null) for (var k = ownKeys(mod), i = 0; i < k.length; i++) if (k[i] !== "default") __createBinding(result, mod, k[i]);
+        __setModuleDefault(result, mod);
+        return result;
+    };
+})();
+Object.defineProperty(exports, "__esModule", { value: true });
+const hono_1 = require("hono");
+const cors_1 = require("hono/cors");
+const logger_1 = require("hono/logger");
+const pretty_json_1 = require("hono/pretty-json");
 // In-memory storage (後でDBに変更予定)
 let nextId = 3; // ID管理用カウンター
 let todos = [
@@ -20,11 +55,11 @@ let todos = [
         updatedAt: new Date().toISOString()
     }
 ];
-const app = new Hono();
+const app = new hono_1.Hono();
 // Middleware
-app.use('*', logger());
-app.use('*', prettyJSON());
-app.use('/api/*', cors({
+app.use('*', (0, logger_1.logger)());
+app.use('*', (0, pretty_json_1.prettyJSON)());
+app.use('/api/*', (0, cors_1.cors)({
     origin: [
         'http://localhost:5173',
         'https://cicd-todo-app-89c3b.web.app',
@@ -98,12 +133,12 @@ app.delete('/api/todos/:id', (c) => {
     return c.json({ message: 'Todo deleted successfully' });
 });
 // Cloudflare Workers 用のexport
-export default app;
+exports.default = app;
 // ローカル開発用 (Node.js) - Workers環境では実行されない
 // @ts-ignore
 if (typeof globalThis.process !== 'undefined' && !globalThis.navigator?.userAgent?.includes('Cloudflare-Workers')) {
     // Dynamic import で Workers 環境での解析を回避
-    import('@hono/node-server').then(({ serve }) => {
+    Promise.resolve().then(() => __importStar(require('@hono/node-server'))).then(({ serve }) => {
         const port = globalThis.process.env.PORT ? parseInt(globalThis.process.env.PORT) : 3001;
         console.log(`🔥 Hono server starting on port ${port}`);
         serve({

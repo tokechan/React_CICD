@@ -9,12 +9,12 @@ import {
   DeleteCommand,
   ScanCommand,
 } from '@aws-sdk/lib-dynamodb';
-import { table } from 'console';
+
 
 // DynamoDBの設定
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'TodoApp';
+const tableName = process.env.TABLE_NAME || 'TodoApp';
 
 
 //Honoのアプリケーションを作成

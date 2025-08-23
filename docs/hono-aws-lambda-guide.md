@@ -703,6 +703,103 @@ npm run build
 npm run deploy  # または firebase deploy --only hosting
 ```
 
+## 📋 プロジェクト実装記録（2025/08/23）
+
+### 🎯 実装概要
+
+**Hono + AWS Lambda Todo アプリケーション**の完全な実装とデプロイ記録
+
+### ✅ 解決できた問題
+
+#### 1. **npm install エラー解決**
+
+- **問題**: `@hono/aws-lambda` パッケージが存在しない
+- **解決**: Hono の AWS Lambda 統合はメインの`hono`パッケージに含まれる
+- **修正**: `package.json` から不要な依存関係を削除
+
+#### 2. **TypeScript コンパイルエラー修正**
+
+- **問題**: 複数の型定義エラー（id: number vs string、console/process 未定義など）
+- **解決**:
+  - 型定義の一貫性確保（バックエンド・フロントエンド間で string 型統一）
+  - TypeScript 設定の修正（lib: ["ES2022", "DOM"]）
+  - 不要な import の削除
+
+#### 3. **バックエンドビルド成功**
+
+- **問題**: ES モジュール vs CommonJS の互換性問題
+- **解決**:
+  - TypeScript 設定を CommonJS に変更
+  - Lambda 関数用の適切なビルド設定
+
+#### 4. **インフラデプロイ完了**
+
+- **AWS リソース**: Lambda 関数、API Gateway、DynamoDB テーブル
+- **API URL**: `https://ngj9fqygie.execute-api.us-east-1.amazonaws.com/prod/`
+- **デプロイ時間**: 約 40 秒
+
+#### 5. **AWS 権限設定**
+
+- **IAM ロール**: DynamoDB アクセス権限の付与
+- **環境変数**: `TABLE_NAME` の設定
+
+#### 6. **Git 操作完了**
+
+- **ブランチ**: `aws-serverless` → `main` マージ
+- **プッシュ**: リモートリポジトリに反映
+- **CI/CD**: 自動デプロイパイプライン起動
+
+### ❌ まだ解決できていない問題
+
+#### 1. **Lambda 関数 モジュール解決エラー**
+
+- **エラー**: `Error: Cannot find module 'hono'`
+- **原因**: CDK の esbuild バンドル設定が正しく機能していない
+- **影響**: Lambda 関数が起動時に hono モジュールを見つけられない
+- **結果**: 502 Bad Gateway エラー
+
+#### 2. **CORS 設定問題**
+
+- **エラー**: `No 'Access-Control-Allow-Origin' header is present`
+- **原因**: Lambda 関数が CORS ヘッダーを返していない
+- **影響**: フロントエンドからの API 呼び出しがブロックされる
+
+### 🔧 技術スタック
+
+- **バックエンド**: Hono (TypeScript)
+- **インフラ**: AWS CDK (Lambda + API Gateway + DynamoDB)
+- **フロントエンド**: React + TypeScript
+- **デプロイ**: Firebase Hosting + GitHub Actions
+
+### 📊 現在の状態
+
+- **ローカル開発**: ✅ 完了
+- **インフラ構築**: ✅ 完了
+- **AWS デプロイ**: ✅ 完了
+- **API 接続**: ❌ 未完了（モジュール解決エラー）
+- **CORS 設定**: ❌ 未完了
+
+### 🎯 次のステップ
+
+1. **Lambda 関数 モジュールバンドルの修正**
+
+   - esbuild 設定の見直し
+   - または、Lambda Layer の使用検討
+
+2. **CORS ヘッダーの実装**
+
+   - Hono ミドルウェアで CORS 対応
+
+3. **API 接続テスト**
+   - 正常動作確認
+
+### 💡 学んだ教訓
+
+- AWS Lambda では CommonJS モジュール形式が必要
+- TypeScript 設定はターゲット環境に合わせて調整する必要がある
+- CDK の bundling 設定は複雑で、慎重な調整が必要
+- バックエンド・フロントエンド間での型定義の一貫性が重要
+
 ---
 
 _このガイドは Hono + AWS Lambda バックエンド構築の完全な手順書です。_

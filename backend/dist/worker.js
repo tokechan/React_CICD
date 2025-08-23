@@ -1,21 +1,24 @@
-import { Hono } from 'hono';
-import { handle } from 'hono/aws-lambda';
-import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
-import { DynamoDBDocumentClient, GetCommand, PutCommand, UpdateCommand, DeleteCommand, ScanCommand, } from '@aws-sdk/lib-dynamodb';
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+exports.handler = void 0;
+const hono_1 = require("hono");
+const aws_lambda_1 = require("hono/aws-lambda");
+const client_dynamodb_1 = require("@aws-sdk/client-dynamodb");
+const lib_dynamodb_1 = require("@aws-sdk/lib-dynamodb");
 // DynamoDBの設定
-const client = new DynamoDBClient({});
-const docClient = DynamoDBDocumentClient.from(client);
-const tableName = process.env.DYNAMODB_TABLE_NAME || 'TodoApp';
+const client = new client_dynamodb_1.DynamoDBClient({});
+const docClient = lib_dynamodb_1.DynamoDBDocumentClient.from(client);
+const tableName = process.env.TABLE_NAME || 'TodoApp';
 //Honoのアプリケーションを作成
-const app = new Hono();
+const app = new hono_1.Hono();
 //hepler function 
 const getTodos = async () => {
-    const command = new ScanCommand({ TableName: tableName });
+    const command = new lib_dynamodb_1.ScanCommand({ TableName: tableName });
     const response = await docClient.send(command);
     return response.Items || [];
 };
 const getTodo = async (id) => {
-    const command = new GetCommand({
+    const command = new lib_dynamodb_1.GetCommand({
         TableName: tableName,
         Key: { id },
     });
@@ -29,7 +32,7 @@ const createTodo = async (todo) => {
         createdAt: now,
         updatedAt: now,
     };
-    const command = new PutCommand({
+    const command = new lib_dynamodb_1.PutCommand({
         TableName: tableName,
         Item: newTodo,
     });
@@ -45,7 +48,7 @@ const updateTodo = async (id, updates) => {
         ...updates,
         updatedAt: new Date().toISOString(),
     };
-    const command = new UpdateCommand({
+    const command = new lib_dynamodb_1.UpdateCommand({
         TableName: tableName,
         Key: { id },
         UpdateExpression: 'SET title = :title, completed = :completed, updatedAt = :updatedAt',
@@ -60,7 +63,7 @@ const updateTodo = async (id, updates) => {
     return response.Attributes || null;
 };
 const deleteTodo = async (id) => {
-    const command = new DeleteCommand({
+    const command = new lib_dynamodb_1.DeleteCommand({
         TableName: tableName,
         Key: { id },
     });
@@ -151,7 +154,7 @@ app.delete('/api/todos/:id', async (c) => {
     }
 });
 //Lambda handler
-export const handler = handle(app);
+exports.handler = (0, aws_lambda_1.handle)(app);
 // Routes
 app.get('/', (c) => {
     return c.json({
@@ -167,5 +170,5 @@ app.get('/health', (c) => {
     return c.json({ status: 'OK', timestamp: new Date().toISOString() });
 });
 // Cloudflare Workers 用のexport
-export default app;
+exports.default = app;
 //# sourceMappingURL=worker.js.map

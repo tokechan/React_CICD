@@ -109,13 +109,14 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-707236141338-us-east-1",
-     "S3Key": "b89122537a3250ecbd39fad20658608e4a3d621fcef6a3578ba3b78e8462e448.zip"
+     "S3Key": "f406015f32aadc30a37901932f7fe535cb97dcdf468d1d466c6ff00db8718080.zip"
     },
     "Environment": {
      "Variables": {
       "TABLE_NAME": {
        "Ref": "TodoTable585F1D6B"
-      }
+      },
+      "DEPLOY_TIMESTAMP": "1755936053550"
      }
     },
     "Handler": "worker.handler",
@@ -135,7 +136,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoFunction/Resource",
-    "aws:asset:path": "asset.b89122537a3250ecbd39fad20658608e4a3d621fcef6a3578ba3b78e8462e448",
+    "aws:asset:path": "asset.f406015f32aadc30a37901932f7fe535cb97dcdf468d1d466c6ff00db8718080",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }

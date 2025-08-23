@@ -25,9 +25,38 @@ export class BackendStack extends Stack {
       handler: 'worker.handler',
       environment: {
         TABLE_NAME: table.tableName,
+        DEPLOY_TIMESTAMP: Date.now().toString(), // 強制的に新しいデプロイをトリガー
       },
       timeout: Duration.seconds(30),
       memorySize: 256,
+      bundling: {
+        minify: true,
+        sourceMap: true,
+        target: 'node18',
+        loader: {
+          '.js': 'js',
+          '.ts': 'ts',
+        },
+        define: {
+          'process.env.NODE_ENV': '"production"',
+        },
+        banner: {
+          js: '// Lambda function bundled with esbuild',
+        },
+        external: [],
+        nodeModules: ['hono', '@aws-sdk/client-dynamodb', '@aws-sdk/lib-dynamodb'],
+        commandHooks: {
+          beforeBundling(inputDir: string, outputDir: string): string[] {
+            return [];
+          },
+          afterBundling(inputDir: string, outputDir: string): string[] {
+            return [];
+          },
+          beforeInstall(inputDir: string, outputDir: string): string[] {
+            return [];
+          },
+        },
+      },
     });
 
     // DynamoDBアクセス権限付与
