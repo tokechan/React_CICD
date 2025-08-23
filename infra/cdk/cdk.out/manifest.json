@@ -138,7 +138,7 @@
         "validateOnSynth": false,
         "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-deploy-role-707236141338-us-east-1",
         "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-cfn-exec-role-707236141338-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/9a5f9ffff3e6db534614f1722fa86ad96027166f4d0da1338f810c313861c559.json",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/a9c450b12d15784293217297ff2e7ed86d8e0988268e99808369fe1823e07187.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
@@ -199,7 +199,7 @@
         "/TodoAppBackendStack/TodoApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiDeployment88898756b15b3ea4076a5bc7f48252b68552d4f3"
+            "data": "TodoApiDeployment888987568ee57e48e0a92dd00b06e2a54ee2757a"
           }
         ],
         "/TodoAppBackendStack/TodoApi/DeploymentStage.prod/Resource": [
@@ -220,76 +220,22 @@
             "data": "TodoApiOPTIONS40528783"
           }
         ],
-        "/TodoAppBackendStack/TodoApi/Default/GET/ApiPermission.TodoAppBackendStackTodoApiF4753596.GET..": [
+        "/TodoAppBackendStack/TodoApi/Default/ANY/ApiPermission.TodoAppBackendStackTodoApiF4753596.ANY..": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiGETApiPermissionTodoAppBackendStackTodoApiF4753596GET5A7A77DA"
+            "data": "TodoApiANYApiPermissionTodoAppBackendStackTodoApiF4753596ANY21FC63A2"
           }
         ],
-        "/TodoAppBackendStack/TodoApi/Default/GET/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.GET..": [
+        "/TodoAppBackendStack/TodoApi/Default/ANY/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.ANY..": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiGETApiPermissionTestTodoAppBackendStackTodoApiF4753596GET213F6C7C"
+            "data": "TodoApiANYApiPermissionTestTodoAppBackendStackTodoApiF4753596ANY13D98038"
           }
         ],
-        "/TodoAppBackendStack/TodoApi/Default/GET/Resource": [
+        "/TodoAppBackendStack/TodoApi/Default/ANY/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiGET1490360D"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/POST/ApiPermission.TodoAppBackendStackTodoApiF4753596.POST..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPOSTApiPermissionTodoAppBackendStackTodoApiF4753596POST09294A54"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/POST/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.POST..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPOSTApiPermissionTestTodoAppBackendStackTodoApiF4753596POST0456C02C"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/POST/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPOST5E97708A"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/PUT/ApiPermission.TodoAppBackendStackTodoApiF4753596.PUT..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPUTApiPermissionTodoAppBackendStackTodoApiF4753596PUTAFA60085"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/PUT/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.PUT..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPUTApiPermissionTestTodoAppBackendStackTodoApiF4753596PUTF5967770"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/PUT/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiPUT2F638C8D"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/DELETE/ApiPermission.TodoAppBackendStackTodoApiF4753596.DELETE..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiDELETEApiPermissionTodoAppBackendStackTodoApiF4753596DELETE5806626E"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/DELETE/ApiPermission.Test.TodoAppBackendStackTodoApiF4753596.DELETE..": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiDELETEApiPermissionTestTodoAppBackendStackTodoApiF4753596DELETE36786815"
-          }
-        ],
-        "/TodoAppBackendStack/TodoApi/Default/DELETE/Resource": [
-          {
-            "type": "aws:cdk:logicalId",
-            "data": "TodoApiDELETE8A3F5C8E"
+            "data": "TodoApiANY0FB9F7F5"
           }
         ],
         "/TodoAppBackendStack/ExportApiUrl": [

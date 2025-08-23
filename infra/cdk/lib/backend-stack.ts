@@ -18,11 +18,11 @@ export class BackendStack extends Stack {
       removalPolicy: RemovalPolicy.DESTROY, // 開発用
     });
 
-    // Lambda関数作成 - esbuildで完全にバンドル済み
+    // Lambda関数作成 - 事前にビルドしたファイルを使用
     const lambdaFunction = new lambda.Function(this, 'TodoFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
-      code: lambda.Code.fromAsset('../../backend/dist'),
-      handler: 'worker.handler',
+      code: lambda.Code.fromAsset('../../backend'),
+      handler: 'dist/worker.handler',
       environment: {
         TABLE_NAME: table.tableName,
         DEPLOY_TIMESTAMP: Date.now().toString(),
@@ -34,13 +34,12 @@ export class BackendStack extends Stack {
     // DynamoDBアクセス権限付与
     table.grantReadWriteData(lambdaFunction);
 
-    // API Gateway作成
+    // API Gateway作成 - サンプルリポジトリのベストプラクティスに従う
     const api = new apigateway.RestApi(this, 'TodoApi', {
       restApiName: 'Todo API',
       description: 'Todo application API',
       deployOptions: {
         stageName: 'prod',
-        loggingLevel: apigateway.MethodLoggingLevel.INFO,
       },
     });
 
@@ -56,11 +55,8 @@ export class BackendStack extends Stack {
       proxy: true,
     });
 
-    // ルートパスをLambdaにマッピング（プロキシ統合）
-    api.root.addMethod('GET', lambdaIntegration);
-    api.root.addMethod('POST', lambdaIntegration);
-    api.root.addMethod('PUT', lambdaIntegration);
-    api.root.addMethod('DELETE', lambdaIntegration);
+    // 完全なプロキシ統合 - ANYメソッドですべてのリクエストをLambdaに転送
+    api.root.addMethod('ANY', lambdaIntegration);
 
     // プロキシ統合の設定を削除して、完全にLambdaに任せる
     // Honoがすべてのルーティングを処理するため、個別ルート設定は不要

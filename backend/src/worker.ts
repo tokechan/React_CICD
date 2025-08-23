@@ -201,18 +201,36 @@ export const handler = handle(app);
 
 // Routes
 app.get('/', (c) => {
-  return c.json({ 
-    message: 'Todo App Backend with Hono 🔥',
-    version: '1.0.0',
-    endpoints: {
-      todos: '/api/todos',
-      health: '/health'
+  return c.json(
+    {
+      message: 'Todo App Backend with Hono 🔥',
+      version: '1.0.0',
+      endpoints: {
+        todos: '/api/todos',
+        health: '/health'
+      }
+    },
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
     }
-  })
+  )
 })
 
 app.get('/health', (c) => {
-  return c.json({ status: 'OK', timestamp: new Date().toISOString() })
+  return c.json(
+    { status: 'OK', timestamp: new Date().toISOString() },
+    {
+      headers: {
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+      }
+    }
+  )
 })
 
 
