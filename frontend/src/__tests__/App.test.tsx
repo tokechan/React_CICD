@@ -37,9 +37,9 @@ describe("App (API 連携版)", () => {
   it("TODO を追加できる", async () => {
     mockApi.fetchTodos.mockResolvedValue([]);
 
-    // createTodo は呼び出し毎に id をインクリメントして返す
+    // createTodo は呼び出し毎に UUID を生成して返す
     mockApi.createTodo.mockImplementation(async (title: string) => ({
-      id: 1,
+      id: crypto.randomUUID(),
       title,
       completed: false,
       createdAt: new Date().toISOString(),
@@ -64,14 +64,14 @@ describe("App (API 連携版)", () => {
 
   it("TODO を完了状態にできる", async () => {
     const initialTodo = {
-      id: 1,
+      id: crypto.randomUUID(),
       title: "完了テストタスク",
       completed: false,
       createdAt: new Date().toISOString(),
       updatedAt: new Date().toISOString(),
     };
     mockApi.fetchTodos.mockResolvedValue([initialTodo]);
-    mockApi.updateTodo.mockImplementation(async (_id: number, updates) => ({
+    mockApi.updateTodo.mockImplementation(async (_id: string, updates) => ({
       ...initialTodo,
       ...updates,
       updatedAt: new Date().toISOString(),
@@ -89,14 +89,14 @@ describe("App (API 連携版)", () => {
   it("完了した TODO 数が正しく表示される", async () => {
     const todos = [
       {
-        id: 1,
+        id: crypto.randomUUID(),
         title: "タスク1",
         completed: false,
         createdAt: new Date().toISOString(),
         updatedAt: new Date().toISOString(),
       },
       {
-        id: 2,
+        id: crypto.randomUUID(),
         title: "タスク2",
         completed: false,
         createdAt: new Date().toISOString(),
@@ -105,7 +105,7 @@ describe("App (API 連携版)", () => {
     ];
 
     mockApi.fetchTodos.mockResolvedValue(todos);
-    mockApi.updateTodo.mockImplementation(async (id: number, updates) => ({
+    mockApi.updateTodo.mockImplementation(async (id: string, updates) => ({
       ...todos.find((t) => t.id === id)!,
       ...updates,
       updatedAt: new Date().toISOString(),
@@ -136,7 +136,7 @@ describe("App (API 連携版)", () => {
   it("空の TODO は追加されない", async () => {
     mockApi.fetchTodos.mockResolvedValue([]);
     mockApi.createTodo.mockResolvedValueOnce({
-      id: 1,
+      id: crypto.randomUUID(),
       title: "",
       completed: false,
       createdAt: new Date().toISOString(),

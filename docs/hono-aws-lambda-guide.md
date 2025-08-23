@@ -420,6 +420,78 @@ npm run build
 # GitHub Actionsでデプロイ、または手動デプロイ
 ```
 
+## 🐛 よくある問題と解決策
+
+### エラー: `@hono/aws-lambda` パッケージが見つからない
+
+**問題**: npm install 時に以下のエラーが発生
+
+```bash
+npm error 404 Not Found - GET https://registry.npmjs.org/@hono%2faws-lambda - Not found
+```
+
+**原因**: `@hono/aws-lambda` パッケージは存在せず、AWS Lambda アダプターはメインの `hono` パッケージに含まれている
+
+**解決**: package.json から AWS Lambda 固有のパッケージ依存を削除
+
+**修正後の package.json**:
+
+```json
+{
+  "dependencies": {
+    "hono": "^4.6.7",
+    "@aws-sdk/client-dynamodb": "^3.0.0",
+    "@aws-sdk/lib-dynamodb": "^3.0.0"
+  }
+}
+```
+
+### エラー: TypeScript コンパイルエラー
+
+**問題**: ビルド時に複数の TypeScript エラーが発生
+
+1. **Tablename → TableName**（typo）
+2. **UpdatedCommand → UpdateCommand**（typo）
+3. **id 型不一致**（number vs string）
+4. **response.Attributes プロパティアクセスエラー**
+
+**解決**: worker.ts ファイルの修正
+
+**修正内容**:
+
+```typescript
+// 型定義修正
+interface Todo {
+  id: string  // number → string
+  title: string
+  completed: boolean
+  createdAt: string
+  updatedAt: string
+}
+
+// 関数シグネチャ修正
+const getTodo = async (id: string): Promise<Todo | null> => {
+const updateTodo = async (id: string, updates: Partial<Todo>): Promise<Todo | null> => {
+const deleteTodo = async (id: string): Promise<boolean> => {
+
+// APIルート修正
+app.get('/api/todos/:id', async (c) => {
+  const id = c.req.param('id');  // parseInt() 削除
+  // ...
+});
+
+// DynamoDB レスポンス修正
+const response = await docClient.send(command);
+return (response as any).Attributes as Todo || null;
+```
+
+**修正後のビルド結果**:
+
+```bash
+npm run build  # 成功 ✅
+npm run dev    # 正常起動 ✅
+```
+
 ## 🔧 トラブルシューティング
 
 ### エラー: DynamoDB アクセス権限
@@ -502,6 +574,134 @@ aws logs tail /aws/apigateway/TodoApi --follow
 - 本番運用時はセキュリティ設定の強化が必要です
 - コストは AWS 無料枠内で収まる想定です
 - 必要に応じてログと監視の設定を強化してください
+- **最新情報**: AWS Lambda アダプターは `hono` パッケージに含まれるため、別途インストール不要
+
+## 💡 実践的アドバイス
+
+### パッケージ依存関係の確認
+
+Hono の AWS Lambda 統合はメインのパッケージに含まれており、以下の import で使用できます：
+
+```typescript
+import { handle } from 'hono/aws-lambda';
+```
+
+### 型安全性の確保
+
+DynamoDB のレスポンス型は厳格なので、必要に応じて型アサーションを使用：
+
+```typescript
+return ((response as any).Attributes as Todo) || null;
+```
+
+### 開発ワークフロー
+
+1. **ローカル開発**: `npm run dev` で tsx watch
+2. **ビルド確認**: `npm run build` で TypeScript コンパイル
+3. **デプロイ準備**: CDK スタックでインフラ構築
+4. **AWS デプロイ**: `npm run deploy` で本番環境へ
+
+## 🛠️ 実際の開発経験から学んだこと
+
+### インフラデプロイ時のエラー修正
+
+**問題**: CDK デプロイ時に以下のエラーが発生
+
+```bash
+ValidationError: Cannot find asset at /Users/toke/Lab/React_CICD/infra/backend/dist
+```
+
+**原因**: CDK スタックの相対パスが間違っていた
+
+**解決**: `backend-stack.ts` のコードアセットパスを修正
+
+**修正内容**:
+
+```typescript
+// 修正前
+code: lambda.Code.fromAsset('../backend/dist'),
+
+// 修正後
+code: lambda.Code.fromAsset('../../backend/dist'),
+```
+
+### TypeScript 型定義の一貫性問題
+
+**問題**: バックエンドで `id: string` に変更したのに、フロントエンドの型定義が合わずにビルドエラー
+
+**解決**: フロントエンドの型定義をバックエンドに合わせる
+
+**修正内容**:
+
+```typescript
+// frontend/src/api/todoApi.ts
+export interface Todo {
+  id: string; // number → string に変更
+  title: string;
+  completed: boolean;
+  createdAt: string;
+  updatedAt: string;
+}
+
+// App.tsx の重複型定義を削除
+// 修正前: 独自の Todo 型を定義
+// 修正後: api/todoApi.ts からインポート
+import { fetchTodos, createTodo, updateTodo, type Todo } from './api/todoApi';
+```
+
+### テストファイルのモックデータ修正
+
+**問題**: テストで使用するモックデータで `id: number` を使っていたため型エラー
+
+**解決**: `crypto.randomUUID()` を使用して文字列 ID に変更
+
+**修正内容**:
+
+```typescript
+// 修正前
+mockApi.createTodo.mockImplementation(async (title: string) => ({
+  id: 1, // number
+  title,
+  completed: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
+
+// 修正後
+mockApi.createTodo.mockImplementation(async (title: string) => ({
+  id: crypto.randomUUID(), // string (UUID)
+  title,
+  completed: false,
+  createdAt: new Date().toISOString(),
+  updatedAt: new Date().toISOString(),
+}));
+```
+
+### 実装時のポイント
+
+1. **型定義の一貫性**: バックエンドとフロントエンドで同じ型定義を使用する
+2. **パス設定の確認**: CDK デプロイ時の相対パスに注意
+3. **テストデータの整合性**: テストでも本番と同じデータ型を使用する
+4. **環境変数の設定**: `.env` ファイルで API URL を正しく設定する
+
+### 修正後のデプロイフロー
+
+```bash
+# 1. バックエンドビルド
+cd backend && npm run build
+
+# 2. インフラデプロイ
+cd ../infra/cdk && npx cdk deploy TodoAppBackendStack --require-approval never
+
+# 3. フロントエンド設定
+cd ../../frontend && echo "VITE_API_BASE_URL=https://[API_URL]/prod" > .env
+
+# 4. フロントエンドビルド
+npm run build
+
+# 5. フロントエンドデプロイ
+npm run deploy  # または firebase deploy --only hosting
+```
 
 ---
 
