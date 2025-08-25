@@ -21,35 +21,45 @@ const tableName = process.env.TABLE_NAME || 'TodoApp';
 //Honoのアプリケーションを作成
 const app = new Hono();
 
-// 全てのリクエストにCORSヘッダーを追加
-app.use('*', async (c, next) => {
-  const origin = c.req.header('Origin')
-  const allowedOrigins = [
-    'http://localhost:5173',
+// Hono公式CORSミドルウェアを使用
+app.use('/api/*', cors({
+  origin: [
+    'http://localhost:5173', 
     'https://cicd-todo-app-89c3b.web.app',
     'https://cicd-todo-app-89c3b.firebaseapp.com',
     'https://daip3qg4bmyop.cloudfront.net'
-  ]
-  
-  // OPTIONSリクエストの処理
-  if (c.req.method === 'OPTIONS') {
-    return c.json({ message: 'CORS preflight OK' }, 200, {
-      'Access-Control-Allow-Origin': allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0],
-      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
-      'Access-Control-Max-Age': '86400'
-    })
-  }
-  
-  await next()
-  
-  // 全てのレスポンスにCORSヘッダーを追加
-  if (allowedOrigins.includes(origin || '')) {
-    c.header('Access-Control-Allow-Origin', origin || '')
-    c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
-    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
-  }
-})
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  maxAge: 86400,
+  credentials: false  // 認証情報共有は不要
+}))
+
+// ルートエンドポイント用のCORS設定
+app.use('/', cors({
+  origin: [
+    'http://localhost:5173', 
+    'https://cicd-todo-app-89c3b.web.app',
+    'https://cicd-todo-app-89c3b.firebaseapp.com',
+    'https://daip3qg4bmyop.cloudfront.net'
+  ],
+  allowMethods: ['GET', 'OPTIONS'],
+  allowHeaders: ['Content-Type'],
+  maxAge: 86400
+}))
+
+// ヘルスチェック用のCORS設定
+app.use('/health', cors({
+  origin: [
+    'http://localhost:5173', 
+    'https://cicd-todo-app-89c3b.web.app',
+    'https://cicd-todo-app-89c3b.firebaseapp.com',
+    'https://daip3qg4bmyop.cloudfront.net'
+  ],
+  allowMethods: ['GET', 'OPTIONS'],
+  allowHeaders: ['Content-Type'],
+  maxAge: 86400
+}))
 
 // 型定義
 interface Todo {
