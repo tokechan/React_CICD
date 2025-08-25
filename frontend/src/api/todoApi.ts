@@ -4,13 +4,16 @@ const API_BASE_URL = import.meta.env.DEV
   ? 'http://localhost:3001'  // 開発環境
   : (import.meta.env.VITE_API_BASE_URL || 'https://your-api-id.execute-api.region.amazonaws.com/prod')  // 本番環境
 
-console.log('API_BASE_URL:', API_BASE_URL)
-console.log('Environment:', {
-  MODE: import.meta.env.MODE,
-  DEV: import.meta.env.DEV,
-  PROD: import.meta.env.PROD,
-  VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL
-})
+// 開発環境でのみデバッグ情報を出力
+if (import.meta.env.DEV) {
+  console.log('API_BASE_URL:', API_BASE_URL)
+  console.log('Environment:', {
+    MODE: import.meta.env.MODE,
+    DEV: import.meta.env.DEV,
+    PROD: import.meta.env.PROD,
+    VITE_API_BASE_URL: import.meta.env.VITE_API_BASE_URL
+  })
+}
 
 // 型定義（クライアント側専用）
 export interface Todo {
@@ -29,7 +32,10 @@ export interface UpdateTodoRequest {
 // --- API 関数群 ---------------------------------------------------------
 export const fetchTodos = async (): Promise<Todo[]> => {
   const url = `${API_BASE_URL}/api/todos`
-  console.log('Fetching from:', url)
+
+  if (import.meta.env.DEV) {
+    console.log('Fetching from:', url)
+  }
 
   try {
     const res = await fetch(url, {
@@ -40,8 +46,10 @@ export const fetchTodos = async (): Promise<Todo[]> => {
       }
     })
 
-    console.log('Response status:', res.status)
-    console.log('Response headers:', Object.fromEntries(res.headers.entries()))
+    if (import.meta.env.DEV) {
+      console.log('Response status:', res.status)
+      console.log('Response headers:', Object.fromEntries(res.headers.entries()))
+    }
 
     if (!res.ok) {
       const errorText = await res.text()
@@ -50,7 +58,11 @@ export const fetchTodos = async (): Promise<Todo[]> => {
     }
 
     const data = await res.json()
-    console.log('Response data:', data)
+
+    if (import.meta.env.DEV) {
+      console.log('Response data:', data)
+    }
+
     return data.todos as Todo[]
   } catch (error) {
     console.error('Fetch error details:', error)
