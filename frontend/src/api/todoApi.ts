@@ -2,7 +2,7 @@
 // 環境に応じて適切なAPIエンドポイントを使用
 const API_BASE_URL = import.meta.env.DEV
   ? 'http://localhost:3001'  // 開発環境
-  : (import.meta.env.VITE_API_BASE_URL || 'https://your-api-id.execute-api.region.amazonaws.com/prod')  // 本番環境
+  : (import.meta.env.VITE_API_BASE_URL || 'https://horyjsyuf9.execute-api.us-east-1.amazonaws.com')  // HTTP API
 
 // 開発環境でのみデバッグ情報を出力
 if (import.meta.env.DEV) {
