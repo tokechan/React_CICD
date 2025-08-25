@@ -32,6 +32,16 @@ app.use('/api/*', cors({
   allowHeaders: ['Content-Type', 'Authorization']
 }))
 
+// OPTIONSリクエストの明示的な処理
+app.options('/api/*', (c) => {
+  return c.json({ message: 'CORS preflight OK' }, 200, {
+    'Access-Control-Allow-Origin': c.req.header('Origin') || '*',
+    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+    'Access-Control-Max-Age': '86400'
+  })
+})
+
 // 型定義
 interface Todo {
   id: string
