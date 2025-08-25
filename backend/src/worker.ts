@@ -1,5 +1,6 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/aws-lambda'
+import { cors } from 'hono/cors'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { 
   DynamoDBDocumentClient,
@@ -19,6 +20,17 @@ const tableName = process.env.TABLE_NAME || 'TodoApp';
 
 //Honoのアプリケーションを作成
 const app = new Hono();
+
+// CORSミドルウェア
+app.use('/api/*', cors({
+  origin: [
+    'http://localhost:5173',
+    'https://cicd-todo-app-89c3b.web.app',
+    'https://cicd-todo-app-89c3b.firebaseapp.com'
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization']
+}))
 
 // 型定義
 interface Todo {
