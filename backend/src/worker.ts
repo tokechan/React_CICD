@@ -23,16 +23,11 @@ const app = new Hono();
 
 // Hono公式CORSミドルウェアを使用
 app.use('/api/*', cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com',
-    'https://daip3qg4bmyop.cloudfront.net'
-  ],
+  origin: '*', // 一時的にすべて許可
   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  maxAge: 86400,
-  credentials: false  // 認証情報共有は不要
+  maxAge: 60,
+  credentials: false
 }))
 
 // ルートエンドポイント用のCORS設定
@@ -241,38 +236,23 @@ export const handler = handle(app);
 
 
 // Routes
-// app.get('/', (c) => {
-//   return c.json(
-//     {
-//       message: 'Todo App Backend with Hono 🔥',
-//       version: '1.0.0',
-//       endpoints: {
-//         todos: '/api/todos',
-//         health: '/health'
-//       }
-//     },
-//     {
-//       headers: {
-//         'Access-Control-Allow-Origin': '*',
-//         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-//         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-//       }
-//     }
-//   )
-// })
+app.get('/', (c) => {
+  return c.json({
+    message: 'Todo App Backend with Hono 🔥',
+    version: '1.0.0',
+    endpoints: {
+      todos: '/api/todos',
+      health: '/health'
+    }
+  })
+})
 
-// app.get('/health', (c) => {
-//   return c.json(
-//     { status: 'OK', timestamp: new Date().toISOString() },
-//     {
-//       headers: {
-//         'Access-Control-Allow-Origin': '*',
-//         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-//         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-//       }
-//     }
-//   )
-// })
+app.get('/health', (c) => {
+  return c.json({ 
+    status: 'OK', 
+    timestamp: new Date().toISOString() 
+  })
+})
 
 
 
