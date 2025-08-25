@@ -45,7 +45,7 @@ app.use('/', cors({
   ],
   allowMethods: ['GET', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
-  maxAge: 86400
+  maxAge: 60
 }))
 
 // ヘルスチェック用のCORS設定
@@ -58,7 +58,7 @@ app.use('/health', cors({
   ],
   allowMethods: ['GET', 'OPTIONS'],
   allowHeaders: ['Content-Type'],
-  maxAge: 86400
+  maxAge: 60
 }))
 
 // 型定義
@@ -241,38 +241,38 @@ export const handler = handle(app);
 
 
 // Routes
-app.get('/', (c) => {
-  return c.json(
-    {
-      message: 'Todo App Backend with Hono 🔥',
-      version: '1.0.0',
-      endpoints: {
-        todos: '/api/todos',
-        health: '/health'
-      }
-    },
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
-    }
-  )
-})
+// app.get('/', (c) => {
+//   return c.json(
+//     {
+//       message: 'Todo App Backend with Hono 🔥',
+//       version: '1.0.0',
+//       endpoints: {
+//         todos: '/api/todos',
+//         health: '/health'
+//       }
+//     },
+//     {
+//       headers: {
+//         'Access-Control-Allow-Origin': '*',
+//         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+//         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+//       }
+//     }
+//   )
+// })
 
-app.get('/health', (c) => {
-  return c.json(
-    { status: 'OK', timestamp: new Date().toISOString() },
-    {
-      headers: {
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-        'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-      }
-    }
-  )
-})
+// app.get('/health', (c) => {
+//   return c.json(
+//     { status: 'OK', timestamp: new Date().toISOString() },
+//     {
+//       headers: {
+//         'Access-Control-Allow-Origin': '*',
+//         'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+//         'Access-Control-Allow-Headers': 'Content-Type, Authorization',
+//       }
+//     }
+//   )
+// })
 
 
 
