@@ -21,25 +21,34 @@ const tableName = process.env.TABLE_NAME || 'TodoApp';
 //Honoのアプリケーションを作成
 const app = new Hono();
 
-// CORSミドルウェア
-app.use('/api/*', cors({
-  origin: [
+// 全てのリクエストにCORSヘッダーを追加
+app.use('*', async (c, next) => {
+  const origin = c.req.header('Origin')
+  const allowedOrigins = [
     'http://localhost:5173',
     'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com'
-  ],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization']
-}))
-
-// OPTIONSリクエストの明示的な処理
-app.options('/api/*', (c) => {
-  return c.json({ message: 'CORS preflight OK' }, 200, {
-    'Access-Control-Allow-Origin': c.req.header('Origin') || '*',
-    'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
-    'Access-Control-Allow-Headers': 'Content-Type, Authorization',
-    'Access-Control-Max-Age': '86400'
-  })
+    'https://cicd-todo-app-89c3b.firebaseapp.com',
+    'https://daip3qg4bmyop.cloudfront.net'
+  ]
+  
+  // OPTIONSリクエストの処理
+  if (c.req.method === 'OPTIONS') {
+    return c.json({ message: 'CORS preflight OK' }, 200, {
+      'Access-Control-Allow-Origin': allowedOrigins.includes(origin || '') ? origin : allowedOrigins[0],
+      'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS',
+      'Access-Control-Allow-Headers': 'Content-Type, Authorization, X-Requested-With',
+      'Access-Control-Max-Age': '86400'
+    })
+  }
+  
+  await next()
+  
+  // 全てのレスポンスにCORSヘッダーを追加
+  if (allowedOrigins.includes(origin || '')) {
+    c.header('Access-Control-Allow-Origin', origin || '')
+    c.header('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS')
+    c.header('Access-Control-Allow-Headers', 'Content-Type, Authorization, X-Requested-With')
+  }
 })
 
 // 型定義
