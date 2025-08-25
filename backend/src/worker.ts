@@ -1,6 +1,5 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/aws-lambda'
-import { cors } from 'hono/cors'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { 
   DynamoDBDocumentClient,
@@ -21,40 +20,7 @@ const tableName = process.env.TABLE_NAME || 'TodoApp';
 //Honoのアプリケーションを作成
 const app = new Hono();
 
-// Hono公式CORSミドルウェアを使用
-app.use('/api/*', cors({
-  origin: '*', // 一時的にすべて許可
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-  maxAge: 60,
-  credentials: false
-}))
 
-// ルートエンドポイント用のCORS設定
-app.use('/', cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com',
-    'https://daip3qg4bmyop.cloudfront.net'
-  ],
-  allowMethods: ['GET', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
-  maxAge: 60
-}))
-
-// ヘルスチェック用のCORS設定
-app.use('/health', cors({
-  origin: [
-    'http://localhost:5173', 
-    'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com',
-    'https://daip3qg4bmyop.cloudfront.net'
-  ],
-  allowMethods: ['GET', 'OPTIONS'],
-  allowHeaders: ['Content-Type'],
-  maxAge: 60
-}))
 
 // 型定義
 interface Todo {
