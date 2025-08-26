@@ -23,12 +23,12 @@ export default defineConfig(({ mode }) => {
           target: API_BASE,
           changeOrigin: true,
           secure: false,  // ローカル開発でHTTPSを使わないのでfalseに変更
-          configure: (proxy, options) => {
+          configure: (proxy) => {
             // プロキシのログを有効にしてデバッグ
-            proxy.on('proxyReq', (proxyReq, req, res) => {
+            proxy.on('proxyReq', (proxyReq, req) => {
               console.log('Proxy request:', req.method, req.url, '->', proxyReq.path);
             });
-            proxy.on('proxyRes', (proxyRes, req, res) => {
+            proxy.on('proxyRes', (proxyRes, req) => {
               console.log('Proxy response:', proxyRes.statusCode, req.url);
             });
           }
