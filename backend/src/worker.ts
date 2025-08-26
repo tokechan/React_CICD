@@ -1,5 +1,8 @@
 import { Hono } from 'hono'
 import { handle } from 'hono/aws-lambda'
+import { cors } from 'hono/cors'
+import { logger } from 'hono/logger'
+import { prettyJSON } from 'hono/pretty-json'
 import { DynamoDBClient } from '@aws-sdk/client-dynamodb';
 import { 
   DynamoDBDocumentClient,
@@ -19,6 +22,21 @@ const tableName = process.env.TABLE_NAME || 'TodoApp';
 
 //Honoのアプリケーションを作成
 const app = new Hono();
+
+// Middleware
+app.use('*', logger())
+app.use('*', prettyJSON())
+app.use('/api/*', cors({
+
+  
+  origin: [
+    'http://localhost:5173', 
+    'https://cicd-todo-app-89c3b.web.app',
+    'https://cicd-todo-app-89c3b.firebaseapp.com'
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+  allowHeaders: ['Content-Type']
+}))
 
 
 
@@ -224,3 +242,20 @@ app.get('/health', (c) => {
 
 // Cloudflare Workers 用のexport
 export default app
+
+// ローカル開発用 (Node.js) - Workers環境では実行されない
+// @ts-ignore
+if (typeof globalThis.process !== 'undefined' && !globalThis.navigator?.userAgent?.includes('Cloudflare-Workers')) {
+  // Dynamic import で Workers 環境での解析を回避
+  import('@hono/node-server').then(({ serve }) => {
+    const port = globalThis.process.env.PORT ? parseInt(globalThis.process.env.PORT) : 3001
+    
+    console.log(`🔥 Hono server starting on port ${port}`)
+    serve({
+      fetch: app.fetch,
+      port: port
+    })
+  }).catch(() => {
+    // Workers環境では @hono/node-server が利用できないので何もしない
+  })
+}
