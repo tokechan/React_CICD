@@ -14,10 +14,33 @@ import {
 } from '@aws-sdk/lib-dynamodb';
 
 
-// DynamoDBの設定
+// DynamoDBの設定（本番環境用）
 const client = new DynamoDBClient({});
 const docClient = DynamoDBDocumentClient.from(client);
 const tableName = process.env.TABLE_NAME || 'TodoApp';
+
+// ローカル開発用のメモリストレージ
+let localTodos: Todo[] = [
+  {
+    id: '1',
+    title: 'CI/CDパイプラインを学ぶ',
+    completed: true,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  },
+  {
+    id: '2',
+    title: 'Honoでバックエンドを作る',
+    completed: false,
+    createdAt: new Date().toISOString(),
+    updatedAt: new Date().toISOString()
+  }
+];
+
+// 環境判定：ローカル開発環境かどうか
+const isLocalDevelopment = () => {
+  return !process.env.AWS_REGION && !process.env.TABLE_NAME;
+};
 
 
 //Honoのアプリケーションを作成
@@ -27,10 +50,8 @@ const app = new Hono();
 app.use('*', logger())
 app.use('*', prettyJSON())
 app.use('/api/*', cors({
-
-  
   origin: [
-    'http://localhost:5173', 
+    'http://localhost:5173',  // ローカル開発用（統一ポート）
     'https://cicd-todo-app-89c3b.web.app',
     'https://cicd-todo-app-89c3b.firebaseapp.com'
   ],
@@ -49,14 +70,20 @@ interface Todo {
   updatedAt: string
 }
 
-//hepler function 
+//helper function 
 const getTodos = async (): Promise<Todo[]> => {
+  if (isLocalDevelopment()) {
+    return localTodos;
+  }
   const command = new ScanCommand({ TableName: tableName });
   const response = await docClient.send(command);
   return (response.Items as Todo[]) || [];
 };
 
 const getTodo = async (id: string): Promise<Todo | null> => {
+  if (isLocalDevelopment()) {
+    return localTodos.find(todo => todo.id === id) || null;
+  }
   const command = new GetCommand({
     TableName: tableName,
     Key: { id },
@@ -73,6 +100,11 @@ const createTodo = async (todo: Omit<Todo, 'createdAt' | 'updatedAt'>
     createdAt: now,
     updatedAt: now,
   };
+
+  if (isLocalDevelopment()) {
+    localTodos.push(newTodo);
+    return newTodo;
+  }
 
   const command = new PutCommand({
     TableName: tableName,
@@ -95,6 +127,15 @@ const updateTodo = async (
     updatedAt: new Date().toISOString(),
   };
 
+  if (isLocalDevelopment()) {
+    const index = localTodos.findIndex(todo => todo.id === id);
+    if (index !== -1) {
+      localTodos[index] = updatedTodo;
+      return updatedTodo;
+    }
+    return null;
+  }
+
   const command = new UpdateCommand({
     TableName: tableName,
     Key: { id },
@@ -113,6 +154,15 @@ const updateTodo = async (
 };
 
 const deleteTodo = async (id: string): Promise<boolean> => {
+  if (isLocalDevelopment()) {
+    const index = localTodos.findIndex(todo => todo.id === id);
+    if (index !== -1) {
+      localTodos.splice(index, 1);
+      return true;
+    }
+    return false;
+  }
+
   const command = new DeleteCommand({
     TableName: tableName,
     Key: { id },

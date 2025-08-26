@@ -6,6 +6,12 @@ import tailwindcss from '@tailwindcss/vite'
 export default defineConfig(({ mode }) => {
   const env = loadEnv(mode, process.cwd(), '') // '' で VITE_* 以外も読み込める
   const API_BASE = env.VITE_API_BASE_URL || 'http://localhost:3001' // devフォールバック
+  
+  // デバッグ情報を出力
+  console.log('Vite Config Debug:')
+  console.log('  Mode:', mode)
+  console.log('  VITE_API_BASE_URL:', env.VITE_API_BASE_URL)
+  console.log('  API_BASE (final):', API_BASE)
 
   return {
     plugins: [react(), tailwindcss()],
@@ -16,9 +22,16 @@ export default defineConfig(({ mode }) => {
         '/api': {
           target: API_BASE,
           changeOrigin: true,
-          secure: true,
-          // もし API_BASE 側にステージパスが含まれる場合は rewrite で調整
-          // rewrite: (p) => p.replace(/^\/api/, '/prod/api'),
+          secure: false,  // ローカル開発でHTTPSを使わないのでfalseに変更
+          configure: (proxy, options) => {
+            // プロキシのログを有効にしてデバッグ
+            proxy.on('proxyReq', (proxyReq, req, res) => {
+              console.log('Proxy request:', req.method, req.url, '->', proxyReq.path);
+            });
+            proxy.on('proxyRes', (proxyRes, req, res) => {
+              console.log('Proxy response:', proxyRes.statusCode, req.url);
+            });
+          }
         },
       },
     },
