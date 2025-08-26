@@ -43,11 +43,15 @@ export class BackendStack extends Stack {
       },
     });
 
-    // CORS設定 - シンプルに設定
+    // CORS設定 - 他のAIのアドバイスに従って修正
     api.root.addCorsPreflight({
-      allowOrigins: ['*'],
-      allowMethods: ['*'],
-      allowHeaders: ['*'],
+      allowOrigins: [
+        'https://dajp3qg4bmyop.cloudfront.net',  // CloudFront本番環境
+        'http://localhost:5173'                   // ローカル開発環境
+      ],
+      allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+      allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+      maxAge: Duration.seconds(86400), // 24時間キャッシュ
     });
 
     // Lambda統合 - サンプルリポジトリのベストプラクティスに従う
