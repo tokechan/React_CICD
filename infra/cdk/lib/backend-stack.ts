@@ -39,7 +39,7 @@ export class BackendStack extends Stack {
       restApiName: 'Todo API',
       description: 'Todo application API',
       deployOptions: {
-        stageName: 'api',
+        stageName: 'prod',
       },
     });
 

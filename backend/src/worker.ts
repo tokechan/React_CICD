@@ -50,18 +50,20 @@ const app = new Hono();
 app.use('*', logger())
 app.use('*', prettyJSON())
 
-// CORS設定：ローカル開発時のみ適用（本番はAPI Gatewayで制御）
+// CORS設定：全環境で適用（Lambdaプロキシ統合ではLambda側でCORS処理が必須）
+app.use('/api/*', cors({
+  origin: [
+    'http://localhost:5173',  // ローカル開発用
+    'https://dajp3qg4bmyop.cloudfront.net',  // 本番CloudFront
+  ],
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With']
+}))
+
 if (isLocalDevelopment()) {
-  app.use('/api/*', cors({
-    origin: [
-      'http://localhost:5173',  // ローカル開発用（統一ポート）
-    ],
-    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-    allowHeaders: ['Content-Type']
-  }))
   console.log('🔧 CORS enabled for local development')
 } else {
-  console.log('🚀 CORS disabled - handled by API Gateway')
+  console.log('🚀 CORS enabled for production (Lambda proxy integration)')
 }
 
 
