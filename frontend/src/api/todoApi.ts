@@ -30,7 +30,19 @@ export interface UpdateTodoRequest {
 
 // --- API 関数群 ---------------------------------------------------------
 
-const API = (path: string) => `${import.meta.env.VITE_API_BASE_URL}/${path}`
+// 開発環境ではプロキシを使用、本番環境では環境変数を使用
+const getApiUrl = (path: string) => {
+  if (import.meta.env.DEV) {
+    // 開発環境：Viteプロキシを使用して /api/... 形式
+    return `/api${path}`
+  } else {
+    // 本番環境：環境変数のベースURLを使用
+    const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
+    return `${baseUrl}${path}`
+  }
+}
+
+const API = (path: string) => getApiUrl(path)
 
 export const fetchTodos = async () => {
     const res = await fetch(API('/todos'))
