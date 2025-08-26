@@ -5,7 +5,7 @@
 
 // 開発環境でのみデバッグ情報を出力
 if (import.meta.env.DEV) {
-  console.log('API_BASE_URL:', BASE)
+  console.log('API_BASE_URL:', import.meta.env.VITE_API_BASE_URL)
   console.log('Environment:', {
     MODE: import.meta.env.MODE,
     DEV: import.meta.env.DEV,
