@@ -36,9 +36,9 @@ const getApiUrl = (path: string) => {
     // 開発環境：Viteプロキシを使用して /api/... 形式
     return `/api${path}`
   } else {
-    // 本番環境：環境変数のベースURLを使用、/apiパスを追加
+    // 本番環境：API Gatewayのステージが'api'なので、そのまま結合
     const baseUrl = import.meta.env.VITE_API_BASE_URL || ''
-    return `${baseUrl}/api${path}`
+    return `${baseUrl}${path}`
   }
 }
 
