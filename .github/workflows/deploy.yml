@@ -53,9 +53,39 @@ jobs:
         run: npm ci
         working-directory: frontend
 
+      - name: Configure AWS credentials for build
+        if: ${{ inputs.target == 'aws' }}
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Get Backend API URL
+        if: ${{ inputs.target == 'aws' }}
+        id: backend_url
+        run: |
+          BACKEND_STACK="TodoAppBackendStack"
+          API_URL=$(aws cloudformation describe-stacks --stack-name "$BACKEND_STACK" \
+            --query "Stacks[0].Outputs[?OutputKey=='ApiUrl'].OutputValue" --output text 2>/dev/null || echo "")
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            # Try alternative output key names
+            API_URL=$(aws cloudformation describe-stacks --stack-name "$BACKEND_STACK" \
+              --query "Stacks[0].Outputs[?OutputKey=='ApiGatewayUrl'].OutputValue" --output text 2>/dev/null || echo "")
+          fi
+          if [ -z "$API_URL" ] || [ "$API_URL" = "None" ]; then
+            # Use fallback URL if stack outputs are not available
+            API_URL="https://your-api-endpoint.execute-api.us-east-1.amazonaws.com/prod"
+          fi
+          # Remove trailing slash if present
+          API_URL=$(echo "$API_URL" | sed 's|/$||')
+          echo "api_url=$API_URL" >> $GITHUB_OUTPUT
+          echo "Backend API URL: $API_URL"
+
       - name: Build
         env:
           TAILWIND_DISABLE_LIGHTNINGCSS: '1'
+          VITE_API_BASE_URL: ${{ inputs.target == 'aws' && steps.backend_url.outputs.api_url || 'http://localhost:3001' }}
         run: npm run build
         working-directory: frontend
 
