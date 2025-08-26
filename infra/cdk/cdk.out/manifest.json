@@ -11,21 +11,21 @@
     },
     "TodoAppFrontendStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://unknown-account/us-east-1",
+      "environment": "aws://707236141338/us-east-1",
       "properties": {
         "templateFile": "TodoAppFrontendStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/0de92be8f79559dc560051aa18557e0ac40903f6b19134e46daae98e4c989bbd.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-deploy-role-707236141338-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-cfn-exec-role-707236141338-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/f53dad57001d30e8cc34437700c0e350c9aa34867bfb06e66989b9326d98079c.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "TodoAppFrontendStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
+          "arn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-lookup-role-707236141338-us-east-1",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -131,21 +131,21 @@
     },
     "TodoAppBackendStack": {
       "type": "aws:cloudformation:stack",
-      "environment": "aws://unknown-account/us-east-1",
+      "environment": "aws://707236141338/us-east-1",
       "properties": {
         "templateFile": "TodoAppBackendStack.template.json",
         "terminationProtection": false,
         "validateOnSynth": false,
-        "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-deploy-role-${AWS::AccountId}-us-east-1",
-        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-cfn-exec-role-${AWS::AccountId}-us-east-1",
-        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1/7b914fb277cf8638adda442bf6b061211527edeb52a30ac51ba93e469805c52a.json",
+        "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-deploy-role-707236141338-us-east-1",
+        "cloudFormationExecutionRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-cfn-exec-role-707236141338-us-east-1",
+        "stackTemplateAssetObjectUrl": "s3://cdk-hnb659fds-assets-707236141338-us-east-1/62ac5b2a88296d37ad9c5ffc98cdb9c5f3475a89e6abffa690cb2858889bdde3.json",
         "requiresBootstrapStackVersion": 6,
         "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version",
         "additionalDependencies": [
           "TodoAppBackendStack.assets"
         ],
         "lookupRole": {
-          "arn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-lookup-role-${AWS::AccountId}-us-east-1",
+          "arn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-lookup-role-707236141338-us-east-1",
           "requiresBootstrapStackVersion": 8,
           "bootstrapStackVersionSsmParameter": "/cdk-bootstrap/hnb659fds/version"
         }
@@ -199,7 +199,7 @@
         "/TodoAppBackendStack/TodoApi/Deployment/Resource": [
           {
             "type": "aws:cdk:logicalId",
-            "data": "TodoApiDeployment8889875605829ca1d964e25c975895469c35d628"
+            "data": "TodoApiDeployment888987563569854bd38123cf19b4784fe47556a9"
           }
         ],
         "/TodoAppBackendStack/TodoApi/DeploymentStage.prod/Resource": [

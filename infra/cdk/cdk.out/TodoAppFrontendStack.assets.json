@@ -8,26 +8,26 @@
         "packaging": "zip"
       },
       "destinations": {
-        "current_account-us-east-1-e650c2de": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
+        "707236141338-us-east-1-46b54fe5": {
+          "bucketName": "cdk-hnb659fds-assets-707236141338-us-east-1",
           "objectKey": "faa95a81ae7d7373f3e1f242268f904eb748d8d0fdd306e8a6fe515a1905a7d6.zip",
           "region": "us-east-1",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-file-publishing-role-707236141338-us-east-1"
         }
       }
     },
-    "0de92be8f79559dc560051aa18557e0ac40903f6b19134e46daae98e4c989bbd": {
+    "f53dad57001d30e8cc34437700c0e350c9aa34867bfb06e66989b9326d98079c": {
       "displayName": "TodoAppFrontendStack Template",
       "source": {
         "path": "TodoAppFrontendStack.template.json",
         "packaging": "file"
       },
       "destinations": {
-        "current_account-us-east-1-49a8d1f8": {
-          "bucketName": "cdk-hnb659fds-assets-${AWS::AccountId}-us-east-1",
-          "objectKey": "0de92be8f79559dc560051aa18557e0ac40903f6b19134e46daae98e4c989bbd.json",
+        "707236141338-us-east-1-996f1c49": {
+          "bucketName": "cdk-hnb659fds-assets-707236141338-us-east-1",
+          "objectKey": "f53dad57001d30e8cc34437700c0e350c9aa34867bfb06e66989b9326d98079c.json",
           "region": "us-east-1",
-          "assumeRoleArn": "arn:${AWS::Partition}:iam::${AWS::AccountId}:role/cdk-hnb659fds-file-publishing-role-${AWS::AccountId}-us-east-1"
+          "assumeRoleArn": "arn:${AWS::Partition}:iam::707236141338:role/cdk-hnb659fds-file-publishing-role-707236141338-us-east-1"
         }
       }
     }
