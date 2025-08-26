@@ -49,15 +49,20 @@ const app = new Hono();
 // Middleware
 app.use('*', logger())
 app.use('*', prettyJSON())
-app.use('/api/*', cors({
-  origin: [
-    'http://localhost:5173',  // ローカル開発用（統一ポート）
-    'https://cicd-todo-app-89c3b.web.app',
-    'https://cicd-todo-app-89c3b.firebaseapp.com'
-  ],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowHeaders: ['Content-Type']
-}))
+
+// CORS設定：ローカル開発時のみ適用（本番はAPI Gatewayで制御）
+if (isLocalDevelopment()) {
+  app.use('/api/*', cors({
+    origin: [
+      'http://localhost:5173',  // ローカル開発用（統一ポート）
+    ],
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
+    allowHeaders: ['Content-Type']
+  }))
+  console.log('🔧 CORS enabled for local development')
+} else {
+  console.log('🚀 CORS disabled - handled by API Gateway')
+}
 
 
 
