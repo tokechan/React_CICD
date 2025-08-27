@@ -109,14 +109,14 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-707236141338-us-east-1",
-     "S3Key": "2ae15d282997698da90f149cf478920d2fa8af13539ddb38913e35f26785de0b.zip"
+     "S3Key": "83b64370e071d2fbe756104a764035bdf3872e31e5d7a92af48daffed5587de5.zip"
     },
     "Environment": {
      "Variables": {
       "TABLE_NAME": {
        "Ref": "TodoTable585F1D6B"
       },
-      "DEPLOY_TIMESTAMP": "1756187253067"
+      "DEPLOY_TIMESTAMP": "1756261616845"
      }
     },
     "Handler": "dist/worker.handler",
@@ -136,7 +136,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoFunction/Resource",
-    "aws:asset:path": "asset.2ae15d282997698da90f149cf478920d2fa8af13539ddb38913e35f26785de0b",
+    "aws:asset:path": "asset.83b64370e071d2fbe756104a764035bdf3872e31e5d7a92af48daffed5587de5",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
@@ -206,7 +206,7 @@
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/Account"
    }
   },
-  "TodoApiDeployment888987563569854bd38123cf19b4784fe47556a9": {
+  "TodoApiDeployment88898756ae042f86ffc4624c086cc6efe3515326": {
    "Type": "AWS::ApiGateway::Deployment",
    "Properties": {
     "Description": "Todo application API",
@@ -217,8 +217,7 @@
    "DependsOn": [
     "TodoApiproxyANY68677E75",
     "TodoApiproxy074250E1",
-    "TodoApiANY0FB9F7F5",
-    "TodoApiOPTIONS40528783"
+    "TodoApiANY0FB9F7F5"
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/Deployment/Resource",
@@ -229,7 +228,7 @@
    "Type": "AWS::ApiGateway::Stage",
    "Properties": {
     "DeploymentId": {
-     "Ref": "TodoApiDeployment888987563569854bd38123cf19b4784fe47556a9"
+     "Ref": "TodoApiDeployment88898756ae042f86ffc4624c086cc6efe3515326"
     },
     "RestApiId": {
      "Ref": "TodoApi145E2E30"
@@ -241,59 +240,6 @@
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoApi/DeploymentStage.prod/Resource"
-   }
-  },
-  "TodoApiOPTIONS40528783": {
-   "Type": "AWS::ApiGateway::Method",
-   "Properties": {
-    "ApiKeyRequired": false,
-    "AuthorizationType": "NONE",
-    "HttpMethod": "OPTIONS",
-    "Integration": {
-     "IntegrationResponses": [
-      {
-       "ResponseParameters": {
-        "method.response.header.Access-Control-Allow-Headers": "'Content-Type,Authorization,X-Requested-With'",
-        "method.response.header.Access-Control-Allow-Origin": "'https://dajp3qg4bmyop.cloudfront.net'",
-        "method.response.header.Vary": "'Origin'",
-        "method.response.header.Access-Control-Allow-Methods": "'GET,POST,PUT,DELETE,OPTIONS'",
-        "method.response.header.Access-Control-Max-Age": "'86400'"
-       },
-       "ResponseTemplates": {
-        "application/json": "#set($origin = $input.params().header.get(\"Origin\"))\n#if($origin == \"\")\n  #set($origin = $input.params().header.get(\"origin\"))\n#end\n#if($origin == \"http://localhost:5173\")\n  #set($context.responseOverride.header.Access-Control-Allow-Origin = $origin)\n#end"
-       },
-       "StatusCode": "204"
-      }
-     ],
-     "RequestTemplates": {
-      "application/json": "{ statusCode: 200 }"
-     },
-     "Type": "MOCK"
-    },
-    "MethodResponses": [
-     {
-      "ResponseParameters": {
-       "method.response.header.Access-Control-Allow-Headers": true,
-       "method.response.header.Access-Control-Allow-Origin": true,
-       "method.response.header.Vary": true,
-       "method.response.header.Access-Control-Allow-Methods": true,
-       "method.response.header.Access-Control-Max-Age": true
-      },
-      "StatusCode": "204"
-     }
-    ],
-    "ResourceId": {
-     "Fn::GetAtt": [
-      "TodoApi145E2E30",
-      "RootResourceId"
-     ]
-    },
-    "RestApiId": {
-     "Ref": "TodoApi145E2E30"
-    }
-   },
-   "Metadata": {
-    "aws:cdk:path": "TodoAppBackendStack/TodoApi/Default/OPTIONS/Resource"
    }
   },
   "TodoApiANYApiPermissionTodoAppBackendStackTodoApiF4753596ANY21FC63A2": {
@@ -534,7 +480,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02O0W6DMAxFv6XvwWvpF9BNe5tW0b1XJngshSQIO0MI5d+nhE7t0z32ta9dQnkoYb/DmQvd9sVgGlgvgrpXOPN1bReH1rcNrF/YDKRev12GqAa0TYuwvgenxXiXrGc+02QNs/EuKoMW1tpv+1nPfjB6yXOZouLjFZlJGKokio9wCronOSGTwtF0KDTjAmtNLNVoctYDK619cKLeaBz8YslJ6j5VF8EuP7BBTezDpCnHf5D8+DaZd/p370cyx/ho5x9TkHFdmvkMMgaJyvmW4MYvv2UJhwPsdzc2ppiCE2MJ6k3/ADVpgGx1AQAA"
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/02OQW+DMAyFf0vvqTfoYWe6abdpFd29MsFjKSRB2BlCEf99SujUnt5nP/vZJZRFCc87nHmv234/mAbiWVD3Cme+xHZxaH3bQPzCZiD1+u0yrGpA27QI8T04Lca7ZD3yiSZrmI13qzJoIdZ+28968oPRS57LtCo+XJCZhKFKovgAx6B7kiMyKRxNh0IzLhBrYqlGk7PuWGntgxP1RuPgF0tOUvehOgt2+YENamIfJk05/oPkx7fJvNG/ezuSeV3v7fxjCjKuSzOfQcYgq3K+Jbjy029ZQvECxe7Kxuyn4MRYgnrTP6Vflct1AQAA"
    },
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/CDKMetadata/Default"
