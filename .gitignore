@@ -123,4 +123,11 @@ cdk.out/
 # AWS CDK
 .cdk.staging/
 cdk.context.json
-aws-exports.js
+aws-exports.js  
+AWS_accessKeys/
+*.pem
+*.key
+*credentials*
+*accessKeys*
+.aws/
+*.csv
