@@ -89,6 +89,23 @@
          "Ref": "AWS::NoValue"
         }
        ]
+      },
+      {
+       "Action": [
+        "dynamodb:DeleteItem",
+        "dynamodb:GetItem",
+        "dynamodb:PutItem",
+        "dynamodb:Query",
+        "dynamodb:Scan",
+        "dynamodb:UpdateItem"
+       ],
+       "Effect": "Allow",
+       "Resource": {
+        "Fn::GetAtt": [
+         "TodoTable585F1D6B",
+         "Arn"
+        ]
+       }
       }
      ],
      "Version": "2012-10-17"
@@ -109,14 +126,14 @@
    "Properties": {
     "Code": {
      "S3Bucket": "cdk-hnb659fds-assets-707236141338-us-east-1",
-     "S3Key": "83b64370e071d2fbe756104a764035bdf3872e31e5d7a92af48daffed5587de5.zip"
+     "S3Key": "90493a65b11dc29193c88940fbb9e1f04de3e25803cdfbdd29bbcdb0c1229556.zip"
     },
     "Environment": {
      "Variables": {
       "TABLE_NAME": {
        "Ref": "TodoTable585F1D6B"
       },
-      "DEPLOY_TIMESTAMP": "1756261616845"
+      "DEPLOY_TIMESTAMP": "1756265164306"
      }
     },
     "Handler": "dist/worker.handler",
@@ -136,7 +153,7 @@
    ],
    "Metadata": {
     "aws:cdk:path": "TodoAppBackendStack/TodoFunction/Resource",
-    "aws:asset:path": "asset.83b64370e071d2fbe756104a764035bdf3872e31e5d7a92af48daffed5587de5",
+    "aws:asset:path": "asset.90493a65b11dc29193c88940fbb9e1f04de3e25803cdfbdd29bbcdb0c1229556",
     "aws:asset:is-bundled": false,
     "aws:asset:property": "Code"
    }
