@@ -387,47 +387,111 @@ VITE_API_BASE_URL=https://your-api-gateway-url.execute-api.region.amazonaws.com/
 **主要原因**: Lambda プロキシ統合での CORS 設定不備  
 **最終解決方法**: Lambda（Hono）での CORS 処理 + CloudFormation スタック再作成
 
-## ✅ **現在の状況**
 
-**バックアップは既に完了しています！**
-- Gitコミット: `backup_before_docs_cleanup_20241205` ✅
-- すべてのファイルの内容がGit履歴に保存済み ✅
+---
 
-## 🎯 **次のステップ**
+## 🔄 **続編: スタック再作成後の追加問題対応**
 
-**バックアップコマンドはもう必要ありません。**
+### 📅 **対応日**: 2025-08-27
 
-**削除対象ファイルだけを削除してください：**
+### 🚨 **新たに発生した問題**
 
-### **削除対象（3ファイル）:**
-- `docs/cors-troubleshooting-log.md`
-- `docs/production-cors-troubleshooting.md` 
-- `docs/local-development-troubleshooting.md`
+#### **問題6: GitHubセキュリティによるプッシュブロック**
 
-### **削除方法（どちらか選択）:**
-
-#### **方法1: 手動削除**
-```bash
-rm docs/cors-troubleshooting-log.md
-rm docs/production-cors-troubleshooting.md
-rm docs/local-development-troubleshooting.md
+**症状:**
+```
+remote: - Push cannot contain secrets
+remote: Amazon AWS Access Key ID
+remote: Amazon AWS Secret Access Key
 ```
 
-#### **方法2: Gitを使って削除**
+**原因:** AWSアクセスキーがGitリポジトリにコミットされた
+
+**解決方法:**
+1. **機密ファイルの削除とクリーンブランチ作成**
+   ```bash
+   git checkout -b clean-dev <安全なコミット>
+   ```
+2. **.gitignoreの強化**
+   ```gitignore
+   # AWS関連ファイル
+   AWS_accessKeys/
+   *.pem
+   *.key
+   *credentials*
+   *accessKeys*
+   .aws/
+   *.csv
+   ```
+
+#### **問題7: AWS CLI認証設定とGitHub Actions Secretsの混同**
+
+**症状:** ローカルは動作するがCI/CDでAWS認証エラー
+
+**学習ポイント:**
+- **AWS CLI**: ローカル開発用（`~/.aws/credentials`）
+- **GitHub Secrets**: CI/CD用（`AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`）
+- **それぞれ独立して管理が必要**
+
+#### **問題8: DynamoDB権限が反映されない問題**
+
+**症状:** CDKコードに`table.grantReadWriteData(lambdaFunction)`があるのにIAM権限不足
+
+**根本原因:** CloudFormationスタックとCDKコードの不整合
+
+**解決方法:**
 ```bash
-<code_block_to_apply_changes_from>
+# スタック完全再作成
+aws cloudformation delete-stack --stack-name TodoAppBackendStack
+aws cloudformation wait stack-delete-complete --stack-name TodoAppBackendStack
+npx cdk deploy TodoAppBackendStack --require-approval never
 ```
 
-## 📊 **期待される結果**
+#### **問題9: API Gateway URL変更によるDNS解決エラー**
 
-削除後、`docs/`フォルダには **11個のファイル** が残ります。
+**症状:** 
+```
+(failed) net::ERR_NAME_NOT_RESOLVED
+```
 
-## 🔒 **安全確認**
+**原因:** スタック再作成でAPI Gateway URLが変更されたが、フロントエンドが古いURLを参照
 
-- ✅ Git履歴からいつでも復元可能
-- ✅ ファイルの内容はすべて安全に保存済み
-- ✅ 誤削除しても安心
+**解決方法:**
+1. **新しいAPI Gateway URLの確認**
+   ```bash
+   aws apigateway get-rest-apis \
+     --query "items[?contains(name, 'Todo')].{Name:name,Id:id}"
+   ```
+2. **フロントエンドURL更新**
+   ```typescript
+   // frontend/src/api/todoApi.ts
+   const baseUrl = import.meta.env.VITE_API_BASE_URL || 'https://新しいAPI_ID.execute-api.us-east-1.amazonaws.com/prod'
+   ```
 
-**これで作業完了です！** 🎉
+### ✅ **解決済み機能**
+- ✅ **データ取得（GET）**: 正常動作
+- ✅ **新しいタスク追加（POST）**: 正常動作
+- ✅ **CORS設定**: Lambda側のCORS処理で解決
 
-削除を実行していただけますか？ 🤔
+### ❌ **未解決問題**
+- ❌ **チェックボックス更新（PUT）**: 500 Internal Server Error継続
+
+### 🔍 **現在調査中**
+- PUT リクエスト時の Lambda 関数内エラー
+- DynamoDB UpdateItem 操作の詳細確認が必要
+
+### 📚 **重要な学習ポイント**
+
+1. **GitHubセキュリティ機能**: 機密情報の自動検出とプッシュブロック
+2. **認証情報の管理分離**: ローカル vs CI/CD 環境
+3. **Infrastructure as Code**: CDKコードと実際のリソースの整合性
+4. **リソースID変更**: スタック再作成時の連動する設定更新
+5. **段階的デバッグ**: CORS → 権限 → URL → 個別機能の順序
+
+---
+
+**続編作成日**: 2025-08-27  
+**対応時間**: 約 2 時間  
+**主要学習**: AWS開発での運用実態とトラブルシューティング手法  
+**現在のステータス**: 部分的解決（GET/POST正常、PUT調査中）
+
