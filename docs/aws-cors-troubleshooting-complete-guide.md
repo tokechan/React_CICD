@@ -493,5 +493,263 @@ npx cdk deploy TodoAppBackendStack --require-approval never
 **続編作成日**: 2025-08-27  
 **対応時間**: 約 2 時間  
 **主要学習**: AWS開発での運用実態とトラブルシューティング手法  
-**現在のステータス**: 部分的解決（GET/POST正常、PUT調査中）
+**現在のステータス**: 完全解決（全てのAPI操作が正常動作）
+
+---
+
+## 🔧 **Lambda DynamoDB UpdateExpression エラーの完全解決**
+
+### **📋 問題の概要**
+
+AWS Lambda関数でDynamoDB更新処理において、500エラーが発生していた問題の根本原因と解決方法。
+
+### **🔍 発生した問題**
+
+**症状:**
+- AWS Lambda invoke コマンドが「Invalid base64」エラーで実行できない
+- Lambda関数は実行されるが、PUT操作で500エラーが返される
+- エラーメッセージ: `"Failed to update todo"`
+
+**初期の推測:**
+- IAM権限の問題
+- CORS設定の問題
+- DynamoDBアクセス権限の問題
+
+### **🔧 調査プロセス**
+
+#### **1. Lambda Invoke コマンドの修正**
+
+**問題:**
+```bash
+# ❌ エラーになるコマンド
+aws lambda invoke --function-name "TodoAppBackendStack-TodoFunction..." --payload '{"httpMethod": "PUT", ...}' response.json
+```
+
+**解決:**
+```bash
+# ✅ 正しいコマンド
+aws lambda invoke \
+  --function-name "TodoAppBackendStack-TodoFunction..." \
+  --payload file://payload.json \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+```
+
+**重要ポイント:**
+- `--cli-binary-format raw-in-base64-out` オプションが必須
+- JSONペイロードはファイル経由で渡す (`file://payload.json`)
+
+#### **2. CloudWatchログによる根本原因の特定**
+
+**ログ確認コマンド:**
+```bash
+# ログストリーム名取得
+aws logs describe-log-streams \
+  --log-group-name "/aws/lambda/TodoAppBackendStack-TodoFunction..." \
+  --order-by LastEventTime --descending --max-items 1
+
+# ログ詳細確認
+aws logs get-log-events \
+  --log-group-name "/aws/lambda/TodoAppBackendStack-TodoFunction..." \
+  --log-stream-name "2025/08/26/[\$LATEST]..."
+```
+
+**発見されたエラー:**
+```
+ValidationException: Invalid UpdateExpression: An expression attribute value used in expression is not defined; attribute value: :title
+```
+
+### **🐛 根本原因**
+
+DynamoDB UpdateExpressionで、リクエストボディに含まれていないパラメータ（`:title`）を参照していた。
+
+**問題のあるコード:**
+```typescript
+// ❌ 問題のあるUpdateExpression
+const command = new UpdateCommand({
+  UpdateExpression: 'SET title = :title, completed = :completed, updatedAt = :updatedAt',
+  ExpressionAttributeValues: {
+    ':title': updatedTodo.title,      // titleが未定義の場合エラー
+    ':completed': updatedTodo.completed,
+    ':updatedAt': updatedTodo.updatedAt,
+  },
+});
+```
+
+**シナリオ:**
+- PUTリクエストのボディ: `{"completed": true}` (titleなし)
+- UpdateExpressionは`:title`パラメータを期待
+- `:title`が未定義でValidationException発生
+
+### **✅ 解決方法**
+
+**動的UpdateExpression構築:**
+```typescript
+// ✅ 修正されたコード
+const updateTodo = async (id: string, updates: Partial<Todo>): Promise<Todo | null> => {
+  const existingTodo = await getTodo(id);
+  if (!existingTodo) return null;
+
+  const updatedTodo: Todo = {
+    ...existingTodo,
+    ...updates,
+    updatedAt: new Date().toISOString(),
+  };
+
+  // DynamoDB UpdateExpressionを動的に構築
+  const updateExpressions: string[] = [];
+  const expressionAttributeValues: Record<string, any> = {
+    ':updatedAt': updatedTodo.updatedAt,
+  };
+
+  // titleが提供されている場合のみ更新
+  if (updates.title !== undefined) {
+    updateExpressions.push('title = :title');
+    expressionAttributeValues[':title'] = updatedTodo.title;
+  }
+
+  // completedが提供されている場合のみ更新
+  if (updates.completed !== undefined) {
+    updateExpressions.push('completed = :completed');
+    expressionAttributeValues[':completed'] = updatedTodo.completed;
+  }
+
+  // updatedAtは常に更新
+  updateExpressions.push('updatedAt = :updatedAt');
+
+  const command = new UpdateCommand({
+    TableName: tableName,
+    Key: { id },
+    UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+    ExpressionAttributeValues: expressionAttributeValues,
+    ReturnValues: 'ALL_NEW',
+  });
+
+  const response = await docClient.send(command);
+  return (response as any).Attributes as Todo || null;
+};
+```
+
+### **🔄 デプロイと検証**
+
+**修正後の手順:**
+```bash
+# 1. バックエンドビルド
+cd backend && npm run build
+
+# 2. CDKデプロイ
+cd infra/cdk && npx cdk deploy TodoAppBackendStack --require-approval never
+
+# 3. 修正確認
+aws lambda invoke \
+  --function-name "TodoAppBackendStack-TodoFunction..." \
+  --payload file://test_payload.json \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+```
+
+**結果:**
+```json
+{
+  "StatusCode": 200,
+  "body": "{\"todo\":{\"completed\":true,\"createdAt\":\"2025-08-27T02:55:09.554Z\",\"id\":\"d8f0af18-e096-49df-8f1a-f8f3558f26f3\",\"updatedAt\":\"2025-08-27T03:27:50.144Z\",\"title\":\"restart\"}}"
+}
+```
+
+### **📚 重要な学習ポイント**
+
+#### **1. DynamoDB UpdateExpression設計原則**
+- **動的構築**: 提供されたフィールドのみを更新対象にする
+- **パラメータ安全性**: 未定義パラメータの参照を避ける
+- **部分更新対応**: PATCHスタイルの更新を適切に処理
+
+#### **2. AWS CLI デバッグ手法**
+- **ペイロード形式**: `--cli-binary-format raw-in-base64-out`の重要性
+- **ファイル経由**: 複雑なJSONはfile://プレフィックスで渡す
+- **ログ分析**: CloudWatchログが最も信頼できる情報源
+
+#### **3. エラー調査の優先順位**
+1. **コマンド実行エラー** → AWS CLI設定の確認
+2. **Lambda実行エラー** → CloudWatchログの詳細確認
+3. **アプリケーションエラー** → コード・ロジックの確認
+4. **権限エラー** → IAMポリシーの確認
+
+#### **4. TypeScript型安全性の活用**
+```typescript
+// Partial<Todo>を使用した安全な部分更新
+interface UpdateTodoRequest {
+  title?: string;
+  completed?: boolean;
+}
+
+// undefinedチェックによる動的処理
+if (updates.title !== undefined) {
+  // titleが明示的に提供された場合のみ処理
+}
+```
+
+### **🎯 ベストプラクティス**
+
+#### **DynamoDB UpdateExpression**
+```typescript
+// ✅ 推奨パターン
+const buildUpdateExpression = (updates: Partial<Todo>) => {
+  const expressions: string[] = [];
+  const values: Record<string, any> = {};
+  
+  Object.entries(updates).forEach(([key, value]) => {
+    if (value !== undefined) {
+      expressions.push(`${key} = :${key}`);
+      values[`:${key}`] = value;
+    }
+  });
+  
+  return {
+    UpdateExpression: `SET ${expressions.join(', ')}`,
+    ExpressionAttributeValues: values
+  };
+};
+```
+
+#### **Lambda テストコマンド**
+```bash
+# テスト用ペイロードファイル作成
+cat > test_payload.json << 'EOF'
+{
+  "httpMethod": "PUT",
+  "path": "/api/todos/test-id",
+  "headers": {
+    "Content-Type": "application/json",
+    "Origin": "https://your-cloudfront-domain.cloudfront.net"
+  },
+  "body": "{\"completed\": true}"
+}
+EOF
+
+# Lambda関数テスト実行
+aws lambda invoke \
+  --function-name "YourLambdaFunction" \
+  --payload file://test_payload.json \
+  --cli-binary-format raw-in-base64-out \
+  response.json
+
+# レスポンス確認
+cat response.json | jq '.'
+```
+
+### **⚡ トラブルシューティングチェックリスト**
+
+- [ ] AWS CLI コマンドに `--cli-binary-format raw-in-base64-out` オプション追加
+- [ ] ペイロードをファイル経由で渡している
+- [ ] CloudWatchログで詳細エラーメッセージを確認
+- [ ] DynamoDB UpdateExpressionが動的に構築されている
+- [ ] 未定義パラメータの参照を避けている
+- [ ] IAM権限が適切に設定されている（CDKの場合は `table.grantReadWriteData()`）
+
+---
+
+**解決完了日**: 2025-08-27  
+**解決時間**: 約 1 時間  
+**主要学習**: DynamoDB UpdateExpression動的構築とAWS CLIデバッグ手法  
+**最終ステータス**: 完全解決（全API操作正常）
 

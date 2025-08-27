@@ -143,16 +143,32 @@ const updateTodo = async (
     return null;
   }
 
+  // DynamoDB UpdateExpressionを動的に構築
+  const updateExpressions: string[] = [];
+  const expressionAttributeValues: Record<string, any> = {
+    ':updatedAt': updatedTodo.updatedAt,
+  };
+
+  // titleが提供されている場合のみ更新
+  if (updates.title !== undefined) {
+    updateExpressions.push('title = :title');
+    expressionAttributeValues[':title'] = updatedTodo.title;
+  }
+
+  // completedが提供されている場合のみ更新
+  if (updates.completed !== undefined) {
+    updateExpressions.push('completed = :completed');
+    expressionAttributeValues[':completed'] = updatedTodo.completed;
+  }
+
+  // updatedAtは常に更新
+  updateExpressions.push('updatedAt = :updatedAt');
+
   const command = new UpdateCommand({
     TableName: tableName,
     Key: { id },
-    UpdateExpression:
-     'SET title = :title, completed = :completed, updatedAt = :updatedAt',
-    ExpressionAttributeValues: {
-      ':title': updatedTodo.title,
-      ':completed': updatedTodo.completed,
-      ':updatedAt': updatedTodo.updatedAt,
-    },
+    UpdateExpression: `SET ${updateExpressions.join(', ')}`,
+    ExpressionAttributeValues: expressionAttributeValues,
     ReturnValues: 'ALL_NEW',
   });
 
