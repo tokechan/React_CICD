@@ -34,6 +34,20 @@ export class BackendStack extends Stack {
     // DynamoDBアクセス権限付与
     table.grantReadWriteData(lambdaFunction);
 
+    // 明示的に権限を追加
+    lambdaFunction.addToRolePolicy(new iam.PolicyStatement({
+    effect: iam.Effect.ALLOW,
+    actions: [
+      'dynamodb:GetItem',
+      'dynamodb:PutItem',
+      'dynamodb:UpdateItem',
+      'dynamodb:DeleteItem',
+      'dynamodb:Scan',
+      'dynamodb:Query'
+    ],
+        resources: [table.tableArn],
+      }));
+
     // API Gateway作成 - サンプルリポジトリのベストプラクティスに従う
     const api = new apigateway.RestApi(this, 'TodoApi', {
       restApiName: 'Todo API',

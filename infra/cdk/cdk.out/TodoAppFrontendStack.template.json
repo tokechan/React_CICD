@@ -298,7 +298,7 @@
   "CDKMetadata": {
    "Type": "AWS::CDK::Metadata",
    "Properties": {
-    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22LTQrCMBCFz+I+HW08gVYEV4oeQGIylrFtIpmJIqV3l1hBBVfv73sadKlhNjF3LqxripZO0B/E2EaZOx97nkO/TLZBUdXZv90ou9CSfXzqMQ/KtiG5cwxeoN9GqskvrEXmjUMvJK9HlZl1Zv4SK2KJdEpCwWf8Ow+DqhJL6PbIIUWLGfj4n2kXw40cxqVhVAtmlIOYmnydP9sk1ySD8sEhXHh60xrKEmaTCxMVMXmhDmE/6hOMlCZpKAEAAA=="
+    "Analytics": "v2:deflate64:H4sIAAAAAAAA/22LTQrCMBCFz+I+HW1cuNaK4ErRA0hMxjK2JpKZKFJ6d4kVVHD1/r6nQZcaJiNz58K6pmjpCN1ejG2UufOh4yl0i2QbFFWd/NsNsg0t2cenHnKvbBuSO8XgBbpNpJr83FpkXjv0QvJ6VJlZZeYvsSSWSMckFHzGv3PfqyqxhMsOOaRoMQMf/zNtY7iRw7gwjGrOjLIXU5Ov82eT5JqkVz44hDOPb1pDOYNydGaiIiYvdEHYDfoEHKIzzigBAAA="
    },
    "Metadata": {
     "aws:cdk:path": "TodoAppFrontendStack/CDKMetadata/Default"
