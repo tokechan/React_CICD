@@ -386,3 +386,48 @@ VITE_API_BASE_URL=https://your-api-gateway-url.execute-api.region.amazonaws.com/
 **問題解決時間**: 約 3 時間  
 **主要原因**: Lambda プロキシ統合での CORS 設定不備  
 **最終解決方法**: Lambda（Hono）での CORS 処理 + CloudFormation スタック再作成
+
+## ✅ **現在の状況**
+
+**バックアップは既に完了しています！**
+- Gitコミット: `backup_before_docs_cleanup_20241205` ✅
+- すべてのファイルの内容がGit履歴に保存済み ✅
+
+## 🎯 **次のステップ**
+
+**バックアップコマンドはもう必要ありません。**
+
+**削除対象ファイルだけを削除してください：**
+
+### **削除対象（3ファイル）:**
+- `docs/cors-troubleshooting-log.md`
+- `docs/production-cors-troubleshooting.md` 
+- `docs/local-development-troubleshooting.md`
+
+### **削除方法（どちらか選択）:**
+
+#### **方法1: 手動削除**
+```bash
+rm docs/cors-troubleshooting-log.md
+rm docs/production-cors-troubleshooting.md
+rm docs/local-development-troubleshooting.md
+```
+
+#### **方法2: Gitを使って削除**
+```bash
+<code_block_to_apply_changes_from>
+```
+
+## 📊 **期待される結果**
+
+削除後、`docs/`フォルダには **11個のファイル** が残ります。
+
+## 🔒 **安全確認**
+
+- ✅ Git履歴からいつでも復元可能
+- ✅ ファイルの内容はすべて安全に保存済み
+- ✅ 誤削除しても安心
+
+**これで作業完了です！** 🎉
+
+削除を実行していただけますか？ 🤔
