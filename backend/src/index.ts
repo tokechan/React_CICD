@@ -41,8 +41,10 @@ app.use('/api/*', cors({
     'https://cicd-todo-app-89c3b.web.app',
     'https://cicd-todo-app-89c3b.firebaseapp.com'
   ],
-  allowMethods: ['GET', 'POST', 'PUT', 'DELETE'],
-  allowHeaders: ['Content-Type']
+  allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowHeaders: ['Content-Type', 'Authorization', 'Origin', 'Accept'],
+  credentials: true,
+  maxAge: 86400
 }))
 
 // Routes

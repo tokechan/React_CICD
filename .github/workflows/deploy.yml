@@ -11,6 +11,11 @@ on:
           - firebase
         required: true
         default: aws
+      deploy_backend:
+        description: 'Deploy backend to AWS?'
+        type: boolean
+        required: false
+        default: true
       invalidate_cf:
         description: 'AWS: Invalidate CloudFront after upload'
         type: boolean
@@ -35,10 +40,41 @@ permissions:
   contents: read
 
 jobs:
+  deploy_backend:
+    name: Deploy Backend to AWS
+    runs-on: ubuntu-latest
+    if: ${{ inputs.deploy_backend }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: npm
+          cache-dependency-path: backend/package-lock.json
+
+      - name: Install backend dependencies
+        run: npm ci
+        working-directory: backend
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          aws-region: ${{ inputs.aws_region }}
+
+      - name: Deploy backend
+        run: npm run deploy
+        working-directory: backend
+
   build_aws:
     name: Build frontend for AWS
     runs-on: ubuntu-latest
     if: ${{ inputs.target == 'aws' }}
+    needs: deploy_backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -72,6 +108,7 @@ jobs:
     name: Build frontend for Firebase
     runs-on: ubuntu-latest
     if: ${{ inputs.target == 'firebase' }}
+    needs: deploy_backend
     steps:
       - name: Checkout
         uses: actions/checkout@v4
