@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
-import { fetchTodos, createTodo, updateTodo, type Todo } from "./api/todoApi";
+import { fetchTodos, createTodo, updateTodo } from "./api/todoApi";
+import type { Todo } from "../../shared/src/types";
 
 
 function App() {
@@ -15,6 +16,7 @@ function App() {
       try {
         setLoading(true);
         const fetchedTodos = await fetchTodos();
+        console.log('Fetched todos:', fetchedTodos);
         setTodos(fetchedTodos);
         setError("");
       } catch (err) {
@@ -47,9 +49,13 @@ function App() {
       const todoToUpdate = todos.find(todo => todo.id === id);
       if (!todoToUpdate) return;
       
+      console.log('Before update:', todoToUpdate);
+      
       const updatedTodo = await updateTodo(id, { 
         completed: !todoToUpdate.completed 
       });
+      
+      console.log('After update:', updatedTodo);
       
       setTodos(todos.map(todo => 
         todo.id === id ? updatedTodo : todo
@@ -165,7 +171,7 @@ function App() {
               {todos.filter(todo => todo.completed).map((todo) => (
                 <li
                   key={todo.id}
-                  className="flex items-center gap-3 p-3 rounded-lg border bg-green-50 border-green-200 transition-all duration-200"
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-green-100 border-green-300 transition-all duration-200"
                 >
                   <input
                     type="checkbox"
@@ -173,7 +179,7 @@ function App() {
                     onChange={() => handleToggleTodo(todo.id)}
                     className="w-5 h-5 text-green-500 border-gray-300 rounded focus:ring-green-500"
                   />
-                  <span className="flex-1 text-sm line-through text-gray-400">
+                  <span className="flex-1 text-sm line-through text-gray-600">
                     {todo.title}
                   </span>
                 </li>
