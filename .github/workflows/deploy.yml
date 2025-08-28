@@ -106,7 +106,7 @@ jobs:
     name: Build frontend for Firebase
     runs-on: ubuntu-latest
     if: ${{ inputs.target == 'firebase' }}
-    needs: deploy_backend
+    needs: []
     steps:
       - name: Checkout
         uses: actions/checkout@v4
