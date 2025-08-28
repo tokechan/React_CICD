@@ -54,5 +54,8 @@ export default defineConfig(({ mode }) => {
     },
     // たとえば window.__APP_VERSION__ を埋め込みたい場合：
     // define: { __APP_VERSION__: JSON.stringify(process.env.npm_package_version) },
+    define: {
+      'import.meta.env.VITE_API_BASE_URL': JSON.stringify(env.VITE_API_BASE_URL || 'http://localhost:3001')
+    },
   }
 })
