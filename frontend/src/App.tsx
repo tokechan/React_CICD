@@ -76,7 +76,8 @@ function App() {
   
   return (
     <div className="min-h-screen bg-gradient-to-br from-green-50 to-indigo-100 py-8 px-4">
-      <div className="max-w-md mx-auto">
+      <div className="max-w-md mx-auto space-y-6">
+        {/* ヘッダーと入力エリア */}
         <div className="bg-white rounded-lg shadow-lg p-6">
           <h1 className="text-2xl font-bold text-center text-gray-800 mb-6">
             🧺 家事チェッカー
@@ -88,7 +89,7 @@ function App() {
             </div>
           )}
 
-          <div className="flex gap-2 mb-6">
+          <div className="flex gap-2">
             <input 
               type="text"
               name="title"
@@ -106,89 +107,113 @@ function App() {
               追加
             </button>
           </div>
+        </div>
 
+        {/* 未完了タスクのUI */}
+        <div className="bg-white rounded-lg shadow-lg p-6">
+          <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+            📝 未完了のタスク
+          </h2>
+          
           {loading ? (
             <div className="text-center text-gray-500 py-8">
               <p className="text-lg">読み込み中...</p>
             </div>
+          ) : todos.filter(todo => !todo.completed).length === 0 ? (
+            <div className="text-center text-gray-500 py-8">
+              <p className="text-lg">全て終わったよーー👌</p>
+              <p className="text-sm">共有事項を入れる？</p>
+            </div>
           ) : (
-            <>
-              {/* 未完了タスク */}
-              {todos.filter(todo => !todo.completed).length === 0 ? (
-                <div className="text-center text-gray-500 py-8">
-                  <p className="text-lg">全て終わったよーー👌</p>
-                  <p className="text-sm">共有事項を入れる？</p>
-                </div>
-              ) : (
-                <ul className="space-y-3 mb-6">
-                  {todos.filter(todo => !todo.completed).map((todo) => (
-                    <li
-                      key={todo.id}
-                      className="flex items-center gap-3 p-3 rounded-lg border bg-white border-gray-200 hover:bg-gray-50 transition-all duration-200"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={todo.completed}
-                        onChange={() => handleToggleTodo(todo.id)}
-                        className="w-5 h-5 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
-                      />
-                      <span className="flex-1 text-sm text-gray-800">
-                        {todo.title}
-                      </span>
-                    </li>
-                  ))}
-                </ul>
-              )}
-              
-              {/* 完了済みタスク */}
-              {todos.filter(todo => todo.completed).length > 0 && (
-                <div className="mt-8">
-                  <div className="mb-4">
-                    <h2 className="text-lg font-semibold text-gray-700 text-center">✅ 完了済み</h2>
-                    <div className="mt-2 border-t border-gray-200"></div>
-                  </div>
-                  <ul className="space-y-3">
-                    {todos.filter(todo => todo.completed).map((todo) => (
-                      <li
-                        key={todo.id}
-                        className="flex items-center gap-3 p-3 rounded-lg border bg-green-50 border-green-200 transition-all duration-200"
-                      >
-                        <input
-                          type="checkbox"
-                          checked={todo.completed}
-                          onChange={() => handleToggleTodo(todo.id)}
-                          className="w-5 h-5 text-green-500 border-gray-300 rounded focus:ring-green-500"
-                        />
-                        <span className="flex-1 text-sm line-through text-gray-400">
-                          {todo.title}
-                        </span>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-            </>
-          )} 
-
-          {todos.length > 0 && (
-            <div className="mt-6 pt-4 border-t border-gray-200">
+            <ul className="space-y-3">
+              {todos.filter(todo => !todo.completed).map((todo) => (
+                <li
+                  key={todo.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-white border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                >
+                  <input
+                    type="checkbox"
+                    checked={todo.completed}
+                    onChange={() => handleToggleTodo(todo.id)}
+                    className="w-5 h-5 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+                  />
+                  <span className="flex-1 text-sm text-gray-800">
+                    {todo.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+          )}
+          
+          {todos.filter(todo => !todo.completed).length > 0 && (
+            <div className="mt-4 pt-4 border-t border-gray-200">
               <p className="text-sm text-gray-500 text-center">
-                完了しておりんす！: {todos.filter((todo) => todo.completed).length} /{""}
-                {todos.length}
+                未完了: {todos.filter(todo => !todo.completed).length}件
               </p>
             </div>
           )}
-          
-          {/* Thank you アニメーション */}
-          {showAnimation && (
-            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
-              <div className="animate-bounce bg-white rounded-lg shadow-xl p-8 text-center border-4 border-green-300">
-                <div className="text-6xl mb-4 animate-pulse">🎉</div>
-                <div className="text-2xl font-bold text-green-600 animate-pulse">Thank you!!</div>
-              </div>
-            </div>
-          )}
         </div>
+
+        {/* 完了済みタスクのUI */}
+        {todos.filter(todo => todo.completed).length > 0 && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <h2 className="text-xl font-semibold text-gray-800 mb-4 text-center">
+              ✅ 完了済みのタスク
+            </h2>
+            
+            <ul className="space-y-3">
+              {todos.filter(todo => todo.completed).map((todo) => (
+                <li
+                  key={todo.id}
+                  className="flex items-center gap-3 p-3 rounded-lg border bg-green-50 border-green-200 transition-all duration-200"
+                >
+                  <input
+                    type="checkbox"
+                    checked={todo.completed}
+                    onChange={() => handleToggleTodo(todo.id)}
+                    className="w-5 h-5 text-green-500 border-gray-300 rounded focus:ring-green-500"
+                  />
+                  <span className="flex-1 text-sm line-through text-gray-400">
+                    {todo.title}
+                  </span>
+                </li>
+              ))}
+            </ul>
+            
+            <div className="mt-4 pt-4 border-t border-gray-200">
+              <p className="text-sm text-gray-500 text-center">
+                完了済み: {todos.filter(todo => todo.completed).length}件
+              </p>
+            </div>
+          </div>
+        )}
+
+        {/* 全体の進捗サマリー */}
+        {todos.length > 0 && (
+          <div className="bg-white rounded-lg shadow-lg p-6">
+            <div className="text-center">
+              <p className="text-lg font-semibold text-gray-800 mb-2">
+                全体の進捗
+              </p>
+              <p className="text-2xl font-bold text-blue-600">
+                {todos.filter((todo) => todo.completed).length} / {todos.length}
+              </p>
+              <p className="text-sm text-gray-500 mt-1">
+                完了しておりんす！
+              </p>
+            </div>
+          </div>
+        )}
+        
+        {/* Thank you アニメーション */}
+        {showAnimation && (
+          <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+            <div className="animate-bounce bg-white rounded-lg shadow-xl p-8 text-center border-4 border-green-300">
+              <div className="text-6xl mb-4 animate-pulse">🎉</div>
+              <div className="text-2xl font-bold text-green-600 animate-pulse">Thank you!!</div>
+            </div>
+          </div>
+        )}
       </div>
     </div>
   )
