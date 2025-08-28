@@ -66,10 +66,10 @@ jobs:
 
       - name: Deploy backend
         run: |
-          npm run build:lambda
+          npm run build
           cd ../infra/cdk
           npm ci
-          cdk deploy TodoAppBackendStack
+          npx cdk deploy TodoAppBackendStack
         working-directory: backend
 
   build_aws:
