@@ -22,7 +22,7 @@ export class BackendStack extends Stack {
     const lambdaFunction = new lambda.Function(this, 'TodoFunction', {
       runtime: lambda.Runtime.NODEJS_20_X,
       code: lambda.Code.fromAsset('../../backend'),
-      handler: 'dist/worker.handler',
+      handler: 'dist/lambda.handler',
       environment: {
         TABLE_NAME: table.tableName,
         DEPLOY_TIMESTAMP: Date.now().toString(),

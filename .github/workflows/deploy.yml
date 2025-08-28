@@ -65,7 +65,11 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Deploy backend
-        run: npm run deploy:lambda
+        run: |
+          npm run build:lambda
+          cd ../infra/cdk
+          npm ci
+          cdk deploy TodoAppBackendStack
         working-directory: backend
 
   build_aws:
