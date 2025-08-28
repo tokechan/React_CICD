@@ -65,7 +65,7 @@ jobs:
           aws-region: ${{ inputs.aws_region }}
 
       - name: Deploy backend
-        run: npm run deploy
+        run: npm run deploy:lambda
         working-directory: backend
 
   build_aws:

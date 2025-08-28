@@ -12,7 +12,7 @@
     "dev:lambda": "tsx watch src/lambda.ts",
     "start": "node dist/worker.js",
     "deploy": "npm run build && wrangler deploy",
-    "deploy:lambda": "npm run build:lambda && cdk deploy TodoAppBackendStack",
+    "deploy:lambda": "npm run build:lambda && cd ../infra/cdk && cdk deploy TodoAppBackendStack",
     "test": "vitest",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
@@ -27,7 +27,6 @@
     "@types/node": "^20.19.11",
     "@typescript-eslint/eslint-plugin": "^8.39.1",
     "@typescript-eslint/parser": "^8.39.1",
-    "aws-cdk": "^2.0.0",
     "esbuild": "^0.21.0",
     "eslint": "^9.33.0",
     "tsx": "^4.19.2",
