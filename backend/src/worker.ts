@@ -138,6 +138,7 @@ const updateTodo = async (
     const index = localTodos.findIndex(todo => todo.id === id);
     if (index !== -1) {
       localTodos[index] = updatedTodo;
+      // ローカル開発環境でも完全なTodoオブジェクトを返す
       return updatedTodo;
     }
     return null;
@@ -172,8 +173,10 @@ const updateTodo = async (
     ReturnValues: 'ALL_NEW',
   });
 
-  const response = await docClient.send(command);
-  return (response as any).Attributes as Todo || null;
+  await docClient.send(command);
+  
+  // 更新後に完全なTodoオブジェクトを取得して返す
+  return await getTodo(id);
 };
 
 const deleteTodo = async (id: string): Promise<boolean> => {
@@ -256,8 +259,8 @@ app.put('/api/todos/:id', async (c) => {
     const { title, completed } = body;
 
     const updatedTodo = await updateTodo(id, {
-      title: title?.trim(),
-      completed,
+      ...(title !== undefined && { title: title.trim() }),
+      ...(completed !== undefined && { completed }),
     });
 
     if (!updatedTodo) {

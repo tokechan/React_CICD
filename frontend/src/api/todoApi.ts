@@ -14,19 +14,8 @@ if (import.meta.env.DEV) {
   })
 }
 
-// 型定義（クライアント側専用）
-export interface Todo {
-  id: string  // バックエンドに合わせてstring型に変更
-  title: string
-  completed: boolean
-  createdAt: string
-  updatedAt: string
-}
-
-export interface UpdateTodoRequest {
-  title?: string
-  completed?: boolean
-}
+// sharedの型定義を使用
+import type { Todo, UpdateTodoRequest } from '../../../shared/src/types'
 
 // --- API 関数群 ---------------------------------------------------------
 
@@ -69,7 +58,11 @@ export const updateTodo = async (id: string, updates: UpdateTodoRequest) => {
     body: JSON.stringify(updates),
   })
   if (!res.ok) throw new Error(`HTTP ${res.status}: ${await res.text().catch(() => '')}`)
-  return (await res.json()).todo as Todo
+  const responseData = await res.json()
+  console.log('API Response:', responseData)
+  console.log('Todo object from response:', responseData.todo)
+  console.log('Todo title:', responseData.todo?.title)
+  return responseData.todo as Todo
 }
 
 export const deleteTodo = async (id: string) => {

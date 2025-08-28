@@ -1,6 +1,6 @@
 // Todo関連の型定義
 export interface Todo {
-  id: number  // バックエンドに合わせてnumberに統一
+  id: string  // DynamoDBのUUIDに合わせてstring型に統一
   title: string
   completed: boolean
   createdAt: string
