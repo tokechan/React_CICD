@@ -124,10 +124,3 @@ cdk.out/
 .cdk.staging/
 cdk.context.json
 aws-exports.js
-.aws/
-AWS_accessKeys/
-*.csv
-*.pem
-*.key
-*credentials*
-*accessKeys*
