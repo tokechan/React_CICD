@@ -55,18 +55,17 @@ export class BackendStack extends Stack {
       deployOptions: {
         stageName: 'prod',
       },
+      defaultCorsPreflightOptions: {
+        allowOrigins: [
+          'https://dajp3qg4bmyop.cloudfront.net',  // CloudFront本番環境
+          'http://localhost:5173'                   // ローカル開発環境
+        ],
+        allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+        allowCredentials: true,
+        maxAge: Duration.seconds(86400), // 24時間キャッシュ
+      },
     });
-
-    // CORS設定 - 他のAIのアドバイスに従って修正
-    // api.root.addCorsPreflight({
-    //   allowOrigins: [
-    //     'https://dajp3qg4bmyop.cloudfront.net',  // CloudFront本番環境
-    //     'http://localhost:5173'                   // ローカル開発環境
-    //   ],
-    //   allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-    //   allowHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
-    //   maxAge: Duration.seconds(86400), // 24時間キャッシュ
-    // });
 
     // Lambda統合 - サンプルリポジトリのベストプラクティスに従う
     const lambdaIntegration = new apigateway.LambdaIntegration(lambdaFunction, {
