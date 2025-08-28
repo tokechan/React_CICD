@@ -6,10 +6,13 @@
   "scripts": {
     "build": "npm run build:esbuild",
     "build:esbuild": "esbuild src/worker.ts --bundle --platform=node --target=node20 --outfile=dist/worker.js --format=cjs --minify --sourcemap --external:aws-sdk",
+    "build:lambda": "esbuild src/lambda.ts --bundle --platform=node --target=node20 --outfile=dist/lambda.js --format=cjs --minify --sourcemap --external:aws-sdk",
     "build:tsc": "tsc",
     "dev": "tsx watch src/worker.ts",
+    "dev:lambda": "tsx watch src/lambda.ts",
     "start": "node dist/worker.js",
-    "deploy": "npm run build && npx cdk deploy TodoAppBackendStack",
+    "deploy": "npm run build && wrangler deploy",
+    "deploy:lambda": "npm run build:lambda && cdk deploy TodoAppBackendStack",
     "test": "vitest",
     "lint": "eslint src --ext .ts",
     "type-check": "tsc --noEmit"
