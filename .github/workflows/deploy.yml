@@ -43,7 +43,7 @@ jobs:
   deploy_backend:
     name: Deploy Backend to AWS
     runs-on: ubuntu-latest
-    if: ${{ inputs.deploy_backend }}
+    if: ${{ inputs.deploy_backend && inputs.target == 'aws' }}
     steps:
       - name: Checkout
         uses: actions/checkout@v4
