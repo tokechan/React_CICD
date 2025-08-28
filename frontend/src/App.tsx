@@ -7,6 +7,7 @@ function App() {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [showAnimation, setShowAnimation] = useState(false);
 
   // 初期データ取得
   useEffect(() => {
@@ -53,6 +54,13 @@ function App() {
       setTodos(todos.map(todo => 
         todo.id === id ? updatedTodo : todo
       ));
+      
+      // チェックされた場合（完了になった場合）にアニメーションを表示
+      if (!todoToUpdate.completed) {
+        setShowAnimation(true);
+        setTimeout(() => setShowAnimation(false), 2000);
+      }
+      
       setError("");
     } catch (err) {
       setError("Todoの更新に失敗しました");
@@ -103,37 +111,63 @@ function App() {
             <div className="text-center text-gray-500 py-8">
               <p className="text-lg">読み込み中...</p>
             </div>
-          ) : todos.length === 0 ? (
-            <div className="text-center text-gray-500 py-8">
-              <p className="text-lg">全て終わったよーー👌</p>
-              <p className="text-sm">共有事項を入れる？</p>
-            </div>
           ) : (
-            <ul className="space-y-3">
-              {todos.map((todo) => (
-                <li
-                key={todo.id}
-                className={`flex items-center gap-3 p-3 rounded-lg border transition-all duration-200 ${
-                  todo.completed
-                    ? "bg-green-50 border-green-200"
-                    : "bg-white border-gray-200 hover:bg-gray-50"
-                } `}
-                >
-                  <input
-                      type="checkbox"
-                      checked={todo.completed}
-                      onChange={() => handleToggleTodo(todo.id)}
-                      className="w-5 h-5 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
+            <>
+              {/* 未完了タスク */}
+              {todos.filter(todo => !todo.completed).length === 0 ? (
+                <div className="text-center text-gray-500 py-8">
+                  <p className="text-lg">全て終わったよーー👌</p>
+                  <p className="text-sm">共有事項を入れる？</p>
+                </div>
+              ) : (
+                <ul className="space-y-3 mb-6">
+                  {todos.filter(todo => !todo.completed).map((todo) => (
+                    <li
+                      key={todo.id}
+                      className="flex items-center gap-3 p-3 rounded-lg border bg-white border-gray-200 hover:bg-gray-50 transition-all duration-200"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={todo.completed}
+                        onChange={() => handleToggleTodo(todo.id)}
+                        className="w-5 h-5 text-blue-500 border-gray-300 rounded focus:ring-blue-500"
                       />
-                      <span 
-                        className={`flex-1 text-sm ${
-                          todo.completed ? "line-through text-gray-400" : "text-gray-800"
-                      }`}>
+                      <span className="flex-1 text-sm text-gray-800">
                         {todo.title}
                       </span>
-                  </li>
-              ))}
-            </ul>
+                    </li>
+                  ))}
+                </ul>
+              )}
+              
+              {/* 完了済みタスク */}
+              {todos.filter(todo => todo.completed).length > 0 && (
+                <div className="mt-8">
+                  <div className="mb-4">
+                    <h2 className="text-lg font-semibold text-gray-700 text-center">✅ 完了済み</h2>
+                    <div className="mt-2 border-t border-gray-200"></div>
+                  </div>
+                  <ul className="space-y-3">
+                    {todos.filter(todo => todo.completed).map((todo) => (
+                      <li
+                        key={todo.id}
+                        className="flex items-center gap-3 p-3 rounded-lg border bg-green-50 border-green-200 transition-all duration-200"
+                      >
+                        <input
+                          type="checkbox"
+                          checked={todo.completed}
+                          onChange={() => handleToggleTodo(todo.id)}
+                          className="w-5 h-5 text-green-500 border-gray-300 rounded focus:ring-green-500"
+                        />
+                        <span className="flex-1 text-sm line-through text-gray-400">
+                          {todo.title}
+                        </span>
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </>
           )} 
 
           {todos.length > 0 && (
@@ -142,6 +176,16 @@ function App() {
                 完了しておりんす！: {todos.filter((todo) => todo.completed).length} /{""}
                 {todos.length}
               </p>
+            </div>
+          )}
+          
+          {/* Thank you アニメーション */}
+          {showAnimation && (
+            <div className="fixed inset-0 flex items-center justify-center z-50 pointer-events-none">
+              <div className="animate-bounce bg-white rounded-lg shadow-xl p-8 text-center border-4 border-green-300">
+                <div className="text-6xl mb-4 animate-pulse">🎉</div>
+                <div className="text-2xl font-bold text-green-600 animate-pulse">Thank you!!</div>
+              </div>
             </div>
           )}
         </div>
